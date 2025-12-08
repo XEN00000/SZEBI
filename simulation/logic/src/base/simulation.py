@@ -47,6 +47,8 @@ class Simulation:
         interval = self.simulated_millis_per_tick / 1000.0
         next_tick = time.perf_counter()
 
+        time.sleep(self.base_millis_per_tick)
+
         while self.is_running():
             start = time.perf_counter()
             self.tick()
