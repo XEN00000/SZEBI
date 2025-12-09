@@ -261,7 +261,7 @@ class NotificationService:
     
     @staticmethod
     def send_to_emergency_mode(alert):
-        """Wyślij alert na endpoint /emergency-mode"""
+        """Wyślij alert na endpoint /api/optimalization/alarm/ metodą GET (parametry w URL)."""
         try:
             alert_data = {
                 'id': alert.id,
@@ -272,20 +272,19 @@ class NotificationService:
                 'rule_name': alert.alert_rule.name if alert.alert_rule else None,
                 'rule_metric': alert.alert_rule.target_metric if alert.alert_rule else None,
             }
-            
-            response = requests.post(
-                f"{settings.BASE_URL}/emergency-mode",
-                json=alert_data,
+            response = requests.get(
+                f"{settings.BASE_URL}/api/optimalization/alarm/",
+                params=alert_data,
                 timeout=5
             )
-            
-            if response.status_code in [200, 201]:
-                logger.info(f"Alert {alert.id} wysłany do /emergency-mode")
+            if response.status_code == 200:
+                logger.info(f"Alert {alert.id} wysłany do /api/optimalization/alarm/")
                 return True
-            else:
-                logger.error(f"Błąd wysyłania do /emergency-mode: {response.status_code} - {response.text}")
-                return False
+            logger.error(
+                f"Błąd wysyłania do /api/optimalization/alarm/: {response.status_code} - {response.text}"
+            )
+            return False
         except requests.exceptions.RequestException as e:
-            logger.error(f"Błąd połączenia z /emergency-mode: {e}")
+            logger.error(f"Błąd połączenia z /api/optimalization/alarm/: {e}")
             return False
 

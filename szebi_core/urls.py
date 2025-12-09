@@ -26,23 +26,32 @@ router = routers.DefaultRouter()
 router.register(r'alerts', AlertViewSet, basename='alert')
 router.register(r'alert-rules', AlertRuleViewSet, basename='alert-rule')
 
-# mock endpointu emergency_mode
+# mock endpointu optimalization/alarm/
 @csrf_exempt
 def emergency_mode(request):
-    if request.method == 'POST':
-        try:
-            alert_data = json.loads(request.body)
-            print(f"CRITICAL ALERT ID={alert_data.get('id')}, Priority={alert_data.get('priority')}, Rule={alert_data.get('rule_name')}")
-            return JsonResponse({'status': 'received'})
-        except Exception as e:
-            print(f"ERROR parsing alert: {e}")
-            return JsonResponse({'error': str(e)}, status=400)
-    return JsonResponse({'error': 'POST only'}, status=400)
+    try:
+        if request.method == 'POST':
+            alert_data = json.loads(request.body or '{}')
+        else:
+            # Pozwól również na GET (parametry w query string)
+            alert_data = request.GET.dict()
+
+        print(
+            "CRITICAL ALERT",
+            f"ID={alert_data.get('id')}",
+            f"Priority={alert_data.get('priority')}",
+            f"Rule={alert_data.get('rule_name')}",
+            f"Metric={alert_data.get('rule_metric')}"
+        )
+        return JsonResponse({'status': 'received'})
+    except Exception as e:
+        print(f"ERROR parsing alert: {e}")
+        return JsonResponse({'error': str(e)}, status=400)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
 
     # na potrzeby testow, mock endpointu na ktory wysylamy alert krytyczny
-    path('emergency-mode', emergency_mode),
+    path('api/optimalization/alarm/', emergency_mode),
 ]
