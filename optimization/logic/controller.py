@@ -8,7 +8,7 @@ class OptimizationController:
     Zarządza przepływem danych między repozytoriami, algorytmem a światem zewnętrznym.
     """
     def __init__(self):
-        # Wstrzykiwanie zależności (Repositories & Clients) 
+        # Wstrzykiwanie zależności (Repositories & Clients)
         self.device_repo = DeviceRepository()
         self.rule_repo = RuleRepository()
         self.pref_repo = UserPreferenceRepository()
@@ -18,25 +18,42 @@ class OptimizationController:
 
     def receive_alarm(self, alarm_data):
         """
-        Obsługa alarmów przychodzących z zewnątrz (IAlertListener)[cite: 112].
+        Obsługa payloadu z modułu Alarmów (ExternalAlarmSerializer).
+        Metoda działa jako ADAPTER - tłumaczy format zewnętrzny na wewnętrzne akcje.
         """
-        severity = alarm_data.get('severity')
-        device_id = alarm_data.get('device_id')
+        print(f"\n[CONTROLLER] !!! OTRZYMANO ALARM ZEWNĘTRZNY !!!")
         
-        print(f"\n[CONTROLLER] !!! OTRZYMANO ALARM !!!")
-        print(f"Urządzenie ID: {device_id} | Poziom: {severity}")
-        print(f"Treść: {alarm_data.get('message')}")
+        # 1. Pobieramy dane z pól specyficznych dla modułu Alarmów
+        priority = alarm_data.get('priority')          # Np. 'CRITICAL'
+        metric = alarm_data.get('rule_metric')         # Np. 'temp_sensor_1'
+        value = alarm_data.get('triggering_value')     # Np. 99.9
+        
+        print(f"Priorytet: {priority} | Metryka: {metric} | Wartość: {value}")
 
-        if severity == 'CRITICAL':
-            print(f"[CONTROLLER] -> Uruchamiam procedurę awaryjną (Emergency Shutdown)...")
-            # Natychmiastowe wysłanie komendy wyłączenia
-            self.simulation_client.publish_command(device_id, {"status": "OFF", "reason": "ALARM_CRITICAL"})
+        if priority == 'CRITICAL':
+            print(f"[CONTROLLER] -> ALARM KRYTYCZNY! Analizuję cel...")
+            
+            # 2. Logika dopasowania urządzenia (Adapter logic)
+            # W idealnym świecie szukalibyśmy urządzenia po 'metric', 
+            # ale tutaj dla demonstracji zakładamy, że dotyczy to urządzenia ID=1.
+            target_device_id = 1 
+            
+            print(f"[CONTROLLER] -> Wysyłam Emergency Shutdown dla ID={target_device_id}")
+            
+            # 3. Wysłanie komendy wyłączenia do Symulacji
+            self.simulation_client.publish_command(target_device_id, {
+                "status": "OFF", 
+                "reason": "EXTERNAL_ALARM_CRITICAL",
+                "details": f"Metric: {metric}, Value: {value}"
+            })
+            
         else:
-            print("[CONTROLLER] -> Alarm zanotowany, brak akcji krytycznej.")
+            print("[CONTROLLER] -> Alarm niekrytyczny (INFO/WARNING). Loguję i ignoruję.")
 
     def run_optimization_cycle(self):
         """
-        Główna pętla sterowania wyzwalana czasowo lub na żądanie[cite: 108, 179].
+        Główna pętla sterowania wyzwalana czasowo lub na żądanie.
+        [cite_start]Realizuje Use Case: Wykonanie cyklu optymalizacji[cite: 174].
         """
         print("\n=== [START] CYKL OPTYMALIZACJI ===")
 
@@ -57,10 +74,10 @@ class OptimizationController:
         for device in devices:
             print(f"\n--- Przetwarzanie: {device.name} ---")
             
-            # A. Pobierz preferencje dla tego konkretnego urządzenia
+            # [cite_start]A. Pobierz preferencje dla tego konkretnego urządzenia [cite: 114]
             preference = self.pref_repo.get_preference_for_device(device.id)
             
-            # B. Uruchom Czysty Algorytm 
+            # [cite_start]B. Uruchom Czysty Algorytm (calculateOptimalSettings [cite: 247])
             settings = calculate_optimal_settings(
                 device=device,
                 forecast=forecast,
@@ -69,7 +86,8 @@ class OptimizationController:
             )
             
             print(f"   [WYNIK] Wyznaczone nastawy: {settings}")
-            # 3. WYSYŁANIE ROZKAZÓW (Do symulacji) 
+
+            # [cite_start]3. WYSYŁANIE ROZKAZÓW (Do symulacji [cite: 169])
             self.simulation_client.publish_command(device.id, settings)
             processed_count += 1
 

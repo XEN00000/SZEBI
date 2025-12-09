@@ -9,7 +9,6 @@ from .views import (
     OptimizationRuleViewSet, 
     UserPreferenceViewSet
 )
-
 # Router automatycznie tworzy ścieżki dla ViewSetów (
 router = DefaultRouter()
 router.register(r'rules', OptimizationRuleViewSet)
