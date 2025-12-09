@@ -129,15 +129,15 @@ class ReportType(models.TextChoices):
     SEMIANNUAL = 'semiannual'
     ANNUAL = 'annual'
 
-
-class StatisticElement(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
-    periodStart = models.DateTimeField()
-    periodEnd = models.DateTimeField()
-    createdAt = models.DateTimeField(auto_now_add=True)
-    createdBy = models.UUIDField()
-    reportType = models.CharField(max_length=32, choices=ReportType.choices)
-    fileContent = models.BinaryField()
+class StatisticElement:
+    def __init__(self, periodStart, periodEnd, createdBy, reportType, fileContent):
+        self.id = uuid4()
+        self.periodStart = periodStart
+        self.periodEnd = periodEnd
+        self.createdAt = None
+        self.createdBy = createdBy
+        self.reportType = reportType
+        self.fileContent = fileContent
 
 
 class Reporting:
