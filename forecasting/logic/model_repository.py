@@ -2,8 +2,8 @@ import uuid
 import pickle
 import os
 from typing import Dict, Optional
-from prediction_model import PredictionModel
-from random_forest_model import RandomForestModel
+from .prediction_model import PredictionModel
+from .random_forest_model import RandomForestModel
 
 class ModelRepository:
     def __init__(self):
