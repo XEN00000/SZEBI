@@ -1,57 +1,53 @@
 import uuid
 import pickle
 import os
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 from .prediction_model import PredictionModel
-from .random_forest_model import RandomForestModel
+
+
+# UWAGA: USUNĘLIŚMY IMPORTY RandomForestModel, XGBoostModel, LSTMModel
+# Repozytorium nie zna tych klas bezpośrednio!
 
 class ModelRepository:
     def __init__(self):
         self.modelCache: Dict[uuid.UUID, PredictionModel] = {}
-        self.activeModelID: Optional[uuid.UUID] = None
+        self.active_models: Dict[str, uuid.UUID] = {}
         self.storage_path = "trained_models/"
         if not os.path.exists(self.storage_path):
             os.makedirs(self.storage_path)
 
+    def create_fresh_candidates(self, target_variable: str) -> List[PredictionModel]:
+        candidates = []
+
+        # Pobieramy wszystkie klasy, które dziedziczą po PredictionModel
+        subclasses = PredictionModel.__subclasses__()
+
+        for model_class in subclasses:
+            instance = model_class(target_variable=target_variable)
+            candidates.append(instance)
+
+        return candidates
+
     def save(self, model: PredictionModel):
         self.modelCache[model.modelID] = model
-
         file_path = os.path.join(self.storage_path, f"{model.modelID}.pkl")
         with open(file_path, 'wb') as f:
             pickle.dump(model, f)
 
-        print(f"Model {model.modelID} został zapisany w repozytorium.")
+    def selectBestModel(self, target_variable: str) -> PredictionModel:
+        relevant = [m for m in self.modelCache.values() if m.target_variable == target_variable]
+        if not relevant:
+            return None
+        return min(relevant, key=lambda m: m.MAPE_Result)
 
-    def selectBestModel(self) -> PredictionModel:
-        if not self.modelCache:
-            print("Brak modeli w cache! Zwracam nowy, niewytrenowany model.")
-            return RandomForestModel()
+    def deployModel(self, model: PredictionModel):
+        self.active_models[model.target_variable] = model.modelID
+        for m in self.modelCache.values():
+            if m.target_variable == model.target_variable:
+                m.isActive = (m.modelID == model.modelID)
 
-        best_model = min(self.modelCache.values(), key=lambda m: m.MAPE_Result)
-
-        print(f"Najlepszy model to {best_model.modelID} z MAPE: {best_model.MAPE_Result}")
-        return best_model
-
-    def deployModel(self, modelId: uuid.UUID):
-        if modelId in self.modelCache:
-            self.activeModelID = modelId
-
-            for mid, model in self.modelCache.items():
-                if mid == modelId:
-                    model.isActive = True
-                else:
-                    model.isActive = False
-
-            print(f"Model {modelId} został wdrożony (DEPLOY).")
-        else:
-            print(f"Błąd: Nie znaleziono modelu o ID {modelId} w repozytorium.")
-
-    def getActiveModel(self) -> PredictionModel:
-        if self.activeModelID and self.activeModelID in self.modelCache:
-            return self.modelCache[self.activeModelID]
-
-        print("Brak aktywnego modelu. Tworzę nowy domyślny model.")
-        new_default_model = RandomForestModel()
-        self.save(new_default_model)
-        self.deployModel(new_default_model.modelID)
-        return new_default_model
+    def getActiveModel(self, target_variable: str) -> Optional[PredictionModel]:
+        mid = self.active_models.get(target_variable)
+        if mid and mid in self.modelCache:
+            return self.modelCache[mid]
+        return None

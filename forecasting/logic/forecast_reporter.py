@@ -19,12 +19,9 @@ class ForecastReporter:
         if self.predictedValues is None:
             return
 
-        # Konwersja macierzy Nx2 na dwie listy
-        # predictedValues = [[cons1, prod1], [cons2, prod2], ...]
-        consumption = [row[0] for row in self.predictedValues]
-        production = [row[1] for row in self.predictedValues]
+        consumption = [float(row[0]) for row in self.predictedValues]
+        production = [float(row[1]) for row in self.predictedValues]
 
-        # Zapisujemy w formacie przyjaznym dla wykresów
         formatted_result = {
             "model_id": str(self.modelID),
             "generated_at": str(self.creationTime),
@@ -36,7 +33,6 @@ class ForecastReporter:
             horizon=len(consumption) * 60, # 24h * 60min
             result=formatted_result
         )
-        print("Raport zapisany w bazie danych.")
 
     def getPredictedValues(self):
         return self.predictedValues

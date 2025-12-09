@@ -1,6 +1,9 @@
+import numpy as np
+
 from .data_processing import DataProcessing
 from .model_repository import ModelRepository
 from .forecast_reporter import ForecastReporter
+
 
 class PredictionManager:
     def __init__(self):
@@ -9,45 +12,61 @@ class PredictionManager:
         self.forecastReporter = ForecastReporter()
 
     def initiateTrainingCycle(self):
-        # 1. Pobierz dane
-        X_train, X_test, y_train, y_test = self.dataProcessor.getTrainingData()
+        """
+        Zarządza procesem treningu:
+        1. Pobiera dane.
+        2. Pobiera listę modeli do treningu (z Repozytorium).
+        3. Trenuje i waliduje każdy model.
+        4. Wybiera najlepszy.
+        """
 
-        if X_train is None:
-            print("Brak danych treningowych.")
-            return
+        targets = ['consumption', 'production']
+        for target in targets:
+            # 1. Dane dla konkretnego celu
+            X_train, X_test, y_train, y_test = self.dataProcessor.getTrainingData(target_variable=target)
 
-        # 2. Pobierz model
-        active_model = self.repository.getActiveModel()
+            if X_train is None:
+                continue
 
-        # 3. Trenuj i Waliduj
-        print(f"Trenowanie modelu {active_model.modelID}...")
-        active_model.train(X_train, y_train)
-        active_model.validate(X_test, y_test)
+            # 2. Kandydaci dla konkretnego celu
+            candidates = self.repository.create_fresh_candidates(target_variable=target)
 
-        # 4. Zapisz
-        self.repository.save(active_model)
+            # 3. Wyścig
+            for model in candidates:
+                model.train(X_train, y_train)
+                model.validate(X_test, y_test)
+                self.repository.save(model)
 
-    def deployBestModel(self):
-        best_model = self.repository.selectBestModel()
-        self.repository.deployModel(best_model.modelID)
+            # 4. Wybór zwycięzcy w tej kategorii
+            self.deployBestModel(target)
+
+    def deployBestModel(self, target_variable):
+        best = self.repository.selectBestModel(target_variable)
+        if best:
+            self.repository.deployModel(best)
 
     def generateAndPublishForecast(self):
-        # 1. Pobierz dane wejściowe na przyszłość (X)
-        # Używamy nowej metody pomocniczej w DataProcessing
         input_data = self.dataProcessor.getPredictionInput()
 
-        # 2. Pobierz aktywny model
-        active_model = self.repository.getActiveModel()
-
-        # 3. Wykonaj predykcję
-        try:
-            prediction_result = active_model.predict(input_data)
-        except Exception as e:
-            print(f"Model niegotowy: {e}")
+        # 1. Prognoza Zużycia
+        model_cons = self.repository.getActiveModel('consumption')
+        if not model_cons:
+            print("Brak modelu consumption!")
             return self.forecastReporter
+        pred_cons = model_cons.predict(input_data)
 
-        # 4. Generuj raport i zapisz
-        self.forecastReporter.generateReport(prediction_result, active_model.modelID)
+        # 2. Prognoza Produkcji
+        model_prod = self.repository.getActiveModel('production')
+        if not model_prod:
+            print("Brak modelu production!")
+            return self.forecastReporter
+        pred_prod = model_prod.predict(input_data)
+
+        # 3. Łączenie wyników (kolumna obok kolumny)
+        combined_result = np.column_stack((pred_cons, pred_prod))
+
+        # Zapis
+        self.forecastReporter.generateReport(combined_result, f"{model_cons.modelID}|{model_prod.modelID}")
         self.forecastReporter.saveToDatabase()
 
         return self.forecastReporter

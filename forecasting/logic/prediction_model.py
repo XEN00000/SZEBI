@@ -3,10 +3,11 @@ from abc import ABC, abstractmethod
 from sklearn.metrics import mean_absolute_percentage_error
 
 class PredictionModel(ABC):
-    def __init__(self):
+    def __init__(self, target_variable="unknown"):
         self.modelID = uuid.uuid4()
         self.MAPE_Result = 0.0
         self.isActive = False
+        self.target_variable = target_variable
 
     @abstractmethod
     def train(self, X_train, y_train):

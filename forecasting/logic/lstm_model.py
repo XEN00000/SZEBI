@@ -4,8 +4,8 @@ from .prediction_model import PredictionModel
 
 
 class LSTMModel(PredictionModel):
-    def __init__(self, numLayers=2, sequenceLength=10):
-        super().__init__()
+    def __init__(self, target_variable="unknown", numLayers=2, sequenceLength=10):
+        super().__init__(target_variable)
 
         self.numLayers = numLayers
         self.sequenceLength = sequenceLength
@@ -25,7 +25,7 @@ class LSTMModel(PredictionModel):
 
             model.add(Dropout(0.2))
 
-        model.add(Dense(output_shape))
+        model.add(Dense(1))
         model.compile(optimizer='adam', loss='mean_squared_error')
         self.internalModel = model
 
