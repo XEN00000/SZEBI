@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     # 'analysis.apps.AnalysisConfig',
     # 'forecasting.apps.ForecastingConfig',
     # 'optimization.apps.OptimizationConfig',
-    # 'alarms.apps.AlarmsConfig',
+    'alarms.apps.AlarmsConfig',
 ]
 
 MIDDLEWARE = [
@@ -126,6 +126,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
+# Base URL dla komunikacji między modułami
+BASE_URL = config('BASE_URL', default='http://localhost:8000')
 
 # Example: other settings that may be useful across modules
 LOG_LEVEL = config('LOG_LEVEL', default='INFO')

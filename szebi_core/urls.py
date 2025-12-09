@@ -15,8 +15,34 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from rest_framework import routers
+from alarms.views import AlertViewSet, AlertRuleViewSet
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+router = routers.DefaultRouter()
+router.register(r'alerts', AlertViewSet, basename='alert')
+router.register(r'alert-rules', AlertRuleViewSet, basename='alert-rule')
+
+# mock endpointu emergency_mode
+@csrf_exempt
+def emergency_mode(request):
+    if request.method == 'POST':
+        try:
+            alert_data = json.loads(request.body)
+            print(f"CRITICAL ALERT ID={alert_data.get('id')}, Priority={alert_data.get('priority')}, Rule={alert_data.get('rule_name')}")
+            return JsonResponse({'status': 'received'})
+        except Exception as e:
+            print(f"ERROR parsing alert: {e}")
+            return JsonResponse({'error': str(e)}, status=400)
+    return JsonResponse({'error': 'POST only'}, status=400)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/', include(router.urls)),
+
+    # na potrzeby testow, mock endpointu na ktory wysylamy alert krytyczny
+    path('emergency-mode', emergency_mode),
 ]
