@@ -12,7 +12,7 @@
 
 
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.utils import timezone
 from enum import Enum
 
@@ -50,7 +50,7 @@ class NotificationGroup(models.Model):
     """Grupa użytkowników do powiadomień"""
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True)
-    users = models.ManyToManyField(User, related_name='notification_groups')
+    users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='notification_groups')
     
     class Meta:
         db_table = 'notification_group'
@@ -75,7 +75,7 @@ class NotificationGroup(models.Model):
 
 class SZEBiUser(models.Model):
     """Rozszerzony profil użytkownika"""
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='szebi_profile')
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='szebi_profile')
     username = models.CharField(max_length=255, unique=True)
     email = models.EmailField()
     phone = models.CharField(max_length=20, blank=True)

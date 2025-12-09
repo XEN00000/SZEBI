@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     # 'analysis.apps.AnalysisConfig',
     # 'forecasting.apps.ForecastingConfig',
     # 'optimization.apps.OptimizationConfig',
-    # 'alarms.apps.AlarmsConfig',
+    'alarms.apps.AlarmsConfig',
 ]
 
 MIDDLEWARE = [
