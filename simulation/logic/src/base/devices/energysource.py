@@ -1,13 +1,12 @@
-from __future__ import annotations
-
-from abc import ABC, abstractmethod
-from simulation.logic.src.base.device import Device
-
+from abc import ABC,abstractmethod
+from base.weather import Weather
+from base.device import Device
+from base.environment import Environment
 
 class EnergySource(Device, ABC):
-    def __init__(self, name: str, env):
+    def __init__(self, name: str, env: Environment):
         super().__init__(name, env)
 
     @abstractmethod
-    def calculate_production(self, weather, millis_passed: int) -> float:
+    def calculate_production(self, weather: Weather, millis_passed: int) -> float:
         pass

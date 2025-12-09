@@ -4,6 +4,7 @@ from simulation.logic.src.base.device import Device
 import json
 
 
+
 class SmartDevice(Device, ABC):
     power_usage: float
     level: float

@@ -3,6 +3,7 @@ from simulation.logic.src.base.devices.energysource import EnergySource
 from simulation.logic.src.base.weather import Weather
 
 
+
 class PhotoVoltaic(EnergySource):
     def __init__(self, name: str, env, peak_power_watt: float):
         super().__init__(name, env)

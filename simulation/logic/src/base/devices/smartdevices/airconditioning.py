@@ -2,6 +2,7 @@ from __future__ import annotations
 from ..smartdevice import SmartDevice
 
 
+
 class AirConditioning(SmartDevice):
     def __init__(self, name: str, env, power_usage_watt: float):
         super().__init__(name, env, power_usage_watt)

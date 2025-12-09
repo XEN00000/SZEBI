@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from simulation.logic.src.base.environment import Environment
 
 
+
 # class RandomEvent:
 #     def __init__(self, chance: float, interval: int):
 #         self.chance = chance

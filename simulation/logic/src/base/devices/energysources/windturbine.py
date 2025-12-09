@@ -3,6 +3,7 @@ from simulation.logic.src.base.devices.energysource import EnergySource
 from simulation.logic.src.base.weather import Weather
 
 
+
 class WindTurbine(EnergySource):
     def __init__(self, name: str, env, rated_power_watt: float, rated_speed: float = 12.0):
         super().__init__(name, env)
