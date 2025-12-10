@@ -1,8 +1,5 @@
 from django.db import models
 
-# tymczasowy import urządzeń - w przyszłości albo z bazy, albo przez API, albo z modułu urządzeń
-from simulation.models import Device
-
 class OptimizationRule(models.Model):
     """
     Reguły optymalizacji definiowane przez administratora.
@@ -26,7 +23,7 @@ class UserPreference(models.Model):
     Preferencje użytkownika przypisane do konkretnego urządzenia.
     """
     # Relacja do urządzenia z modułu symulacji
-    device = models.OneToOneField(Device, on_delete=models.CASCADE, related_name='preference')
+    device = models.OneToOneField('simulation.Device', on_delete=models.CASCADE, related_name='preference')
     # Oczekiwane parametry (np. temperatura w pokoju, jasność)
     target_value = models.FloatField(null=True, blank=True, help_text="Np. docelowa temperatura lub jasność")
     # Harmonogram pracy (JSON)
