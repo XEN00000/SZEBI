@@ -34,18 +34,18 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
-    # Core system app (custom user + shared services)
-    'core.apps.CoreConfig', # To zostawiamy, jeśli folder 'core' istnieje i ma plik apps.py
-    
-    # Modular apps - TYMCZASOWO WYŁĄCZONE
+    # Core system app
+    'core.apps.CoreConfig',
+
+    # Modular apps
     'simulation.apps.SimulationConfig',
     # 'acquisition.apps.AcquisitionConfig',
-    # 'analysis.apps.AnalysisConfig',
+    'analysis.apps.AnalysisConfig',
     # 'forecasting.apps.ForecastingConfig',
-    # 'optimization.apps.OptimizationConfig',
-    # 'alarms.apps.AlarmsConfig',
-    'rest_framework',  # To naprawi błąd TemplateDoesNotExist
-    'optimization',    # To sprawi, że Twój moduł będzie w pełni widoczny
+    'optimization.apps.OptimizationConfig',
+
+    'alarms.apps.AlarmsConfig',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -128,6 +128,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
+# Base URL dla komunikacji między modułami
+BASE_URL = config('BASE_URL', default='http://localhost:8000')
 
 # Example: other settings that may be useful across modules
 LOG_LEVEL = config('LOG_LEVEL', default='INFO')
