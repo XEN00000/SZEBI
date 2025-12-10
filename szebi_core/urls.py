@@ -17,7 +17,45 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+# ---- alarms router + mock endpoint (from alarms branch) ----
+from rest_framework import routers
+from alarms.views import AlertViewSet, AlertRuleViewSet
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+router = routers.DefaultRouter()
+router.register(r'alerts', AlertViewSet, basename='alert')
+router.register(r'alert-rules', AlertRuleViewSet, basename='alert-rule')
+
+@csrf_exempt
+def emergency_mode(request):
+    try:
+        if request.method == 'POST':
+            alert_data = json.loads(request.body or '{}')
+        else:
+            alert_data = request.GET.dict()
+
+        print(
+            "CRITICAL ALERT",
+            f"ID={alert_data.get('id')}",
+            f"Priority={alert_data.get('priority')}",
+            f"Rule={alert_data.get('rule_name')}",
+            f"Metric={alert_data.get('rule_metric')}"
+        )
+        return JsonResponse({'status': 'received'})
+    except Exception as e:
+        print(f"ERROR parsing alert: {e}")
+        return JsonResponse({'error': str(e)}, status=400)
+
+# ---- urlpatterns merged from alarms + main ----
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    # alarms API
+    path('api/', include(router.urls)),
+    path('api/optimalization/alarm/', emergency_mode),
+
+    # analysis module
     path("analysis/", include("analysis.urls")),
 ]
