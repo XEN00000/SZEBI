@@ -6,3 +6,5 @@ gunicorn>=20.1
 pandas
 matplotlib
 reportlab
+regex
+paho-mqtt==1.6.1
