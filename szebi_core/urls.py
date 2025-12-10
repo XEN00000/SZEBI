@@ -16,6 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+
+# ---- alarms router + mock endpoint (from alarms branch) ----
 from rest_framework import routers
 from alarms.views import AlertViewSet, AlertRuleViewSet
 from django.http import JsonResponse
@@ -26,14 +28,12 @@ router = routers.DefaultRouter()
 router.register(r'alerts', AlertViewSet, basename='alert')
 router.register(r'alert-rules', AlertRuleViewSet, basename='alert-rule')
 
-# mock endpointu optimalization/alarm/
 @csrf_exempt
 def emergency_mode(request):
     try:
         if request.method == 'POST':
             alert_data = json.loads(request.body or '{}')
         else:
-            # Pozwól również na GET (parametry w query string)
             alert_data = request.GET.dict()
 
         print(
@@ -48,10 +48,14 @@ def emergency_mode(request):
         print(f"ERROR parsing alert: {e}")
         return JsonResponse({'error': str(e)}, status=400)
 
+# ---- urlpatterns merged from alarms + main ----
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include(router.urls)),
 
-    # na potrzeby testow, mock endpointu na ktory wysylamy alert krytyczny
+    # alarms API
+    path('api/', include(router.urls)),
     path('api/optimalization/alarm/', emergency_mode),
+
+    # analysis module
+    path("analysis/", include("analysis.urls")),
 ]
