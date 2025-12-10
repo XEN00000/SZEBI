@@ -39,7 +39,7 @@ INSTALLED_APPS = [
 
     # Modular apps
     'simulation.apps.SimulationConfig',
-    # 'acquisition.apps.AcquisitionConfig',
+    'acquisition.apps.AcquisitionConfig',
     'forecasting.apps.ForecastingConfig',
     'analysis.apps.AnalysisConfig',
     'optimization.apps.OptimizationConfig',
