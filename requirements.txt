@@ -11,6 +11,7 @@ django-celery-results>=2.5.1
 pywebpush>=1.14.0
 py-vapid>=1.9.0
 pytz>=2023.3
+django-cors-headers
 
 pandas
 matplotlib
