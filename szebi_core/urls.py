@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from core.views import LoginView
 
 # ---- alarms router + mock endpoint (from alarms branch) ----
 from rest_framework import routers
@@ -51,6 +52,8 @@ def emergency_mode(request):
 # ---- urlpatterns merged from alarms + optimization + analysis ----
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    path('api/login/', LoginView.as_view(), name='login'),
 
     # optimization API
     path('api/optimization/', include('optimization.api.urls')),

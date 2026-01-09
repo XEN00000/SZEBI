@@ -1,5 +1,8 @@
 # SZEBI
-The goal of the SZEBI project is to create an intelligent IT system for energy management in commercial and public buildings, designed to optimize energy consumption, minimize operational costs, improve user comfort, and support sustainable development.
+
+The goal of the SZEBI project is to create an intelligent IT system for energy management in commercial and public buildings. The system is designed to optimize energy consumption, minimize operational costs, improve user comfort, and support sustainable development.
+
+---
 
 # Run Instructions (Docker)
 
@@ -19,17 +22,29 @@ cd SZEBI
 docker compose up --build
 ```
 
-Application URL:
+---
+
+## Access URLs
+
+**Frontend (Main Application)**  
+```
+http://localhost:5173
+```
+> This is the primary entry point for users and the default URL that should be used during normal operation.
+
+**Backend API**  
 ```
 http://localhost:8000
 ```
 
-## Create an admin user (on separate console terminal)
-```bash
-docker compose exec web python manage.py createsuperuser
-```
-
-Admin panel:
+**Admin Panel**  
 ```
 http://localhost:8000/admin/
+```
+
+---
+
+## Create an admin user (on a separate terminal)
+```bash
+docker compose exec web python manage.py createsuperuser
 ```
