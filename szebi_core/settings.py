@@ -34,21 +34,24 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
-    # Core system app (custom user + shared services)
-    'core.apps.CoreConfig', # To zostawiamy, jeśli folder 'core' istnieje i ma plik apps.py
-    
-    # Modular apps - TYMCZASOWO WYŁĄCZONE
+    # Core system app
+    'core.apps.CoreConfig',
+
+    # Modular apps
     'simulation.apps.SimulationConfig',
-    # 'acquisition.apps.AcquisitionConfig',
-    # 'analysis.apps.AnalysisConfig',
-    # 'forecasting.apps.ForecastingConfig',
-    # 'optimization.apps.OptimizationConfig',
-    # 'alarms.apps.AlarmsConfig',
+    'acquisition.apps.AcquisitionConfig',
+    'forecasting.apps.ForecastingConfig',
+    'analysis.apps.AnalysisConfig',
+    'optimization.apps.OptimizationConfig',
+    'alarms.apps.AlarmsConfig',
+    'rest_framework',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -127,5 +130,17 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
+# Base URL dla komunikacji między modułami
+BASE_URL = config('BASE_URL', default='http://localhost:8000')
+
 # Example: other settings that may be useful across modules
 LOG_LEVEL = config('LOG_LEVEL', default='INFO')
+
+# CORS Configuration
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
+CORS_ALLOW_CREDENTIALS = True 
+CSRF_TRUSTED_ORIGINS = ["http://localhost:5173"]
