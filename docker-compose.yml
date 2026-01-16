@@ -18,6 +18,17 @@ services:
       timeout: 5s
       retries: 5
 
+  mqtt:
+    image: eclipse-mosquitto:2.0
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+
   web:
     build:
       context: .
@@ -35,8 +46,10 @@ services:
       POSTGRES_PORT: ${POSTGRES_PORT:-5432}
       DEBUG: ${DEBUG:-1}
       DJANGO_PRODUCTION: ${DJANGO_PRODUCTION:-0}
+      MQTT_BROKER_HOST: mqtt
     depends_on:
       - db
+      - mqtt
 
   frontend:
     build:
