@@ -15,4 +15,9 @@ class ElectricGrid(EnergySource):
         pass
 
     def supply(self, needed_kwh: float) -> float:
+        self.count_consumption(needed_kwh)
         return needed_kwh
+
+    # wyslac do bazy danych / do mqtt w zaleznosci od tego co chca
+    def count_consumption(self, consumed_kwh: float) -> float:
+        pass

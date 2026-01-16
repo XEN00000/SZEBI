@@ -17,4 +17,4 @@ class PhotoVoltaic(EnergySource):
         power = self.peak_power * brightness
 
         hours = millis_passed / 3600000
-        return (power * hours) / 1000.0  #
+        return (power * hours) / 1000.0

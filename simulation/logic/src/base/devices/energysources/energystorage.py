@@ -23,4 +23,5 @@ class EnergyStorage(EnergySource):
         return provided
 
     def calculate_production(self, weather: Weather, millis_passed: int) -> float:
-        return 0.0
+        hours = millis_passed / 3600000
+        return min((self.max_discharge * hours) / 1000.0, self.charge)

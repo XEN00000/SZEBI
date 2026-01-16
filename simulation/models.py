@@ -1,1 +1,1 @@
-from simulation.api.models import Device
+from simulation.logic.models import Device

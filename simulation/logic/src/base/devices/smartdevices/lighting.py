@@ -9,16 +9,21 @@ class Lighting(SmartDevice):
         self.is_on = False
 
     def update(self, millis_passed: int):
-        if not self.is_active:
-            self.is_on = False
+        if self.is_active:
+            usage = 1.0
+            if self.is_on:
+                usage += 3.0 * self.level
 
-        if self.is_on:
-            self.env().weather.apply_lighting(1200.0 * self.level)
+            if not super().env().declare_usage(usage, millis_passed):
+                self.is_on = False
+            else:
+                if self.is_on:
+                    self.env().weather.apply_lighting(1200.0 * self.level)
 
-        self.publish_state({
-            "is_on": self.is_on,
-            "power_usage": self.get_power_usage(millis_passed)
-        })
+                self.publish_state({
+                    "is_on": self.is_on,
+                    "power_usage": self.get_power_usage(millis_passed)
+                })
 
     def get_power_usage(self, millis_passed: int) -> float:
         if not self.is_active or not self.is_on:

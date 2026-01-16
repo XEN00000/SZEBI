@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import SimulationState, EnergyTariff, Device, WeatherData
+from simulation.logic.models import SimulationState, EnergyTariff, Device, WeatherData
 
 @admin.register(SimulationState)
 class SimulationStateAdmin(admin.ModelAdmin):
