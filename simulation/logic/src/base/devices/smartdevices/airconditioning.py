@@ -1,33 +1,18 @@
 from __future__ import annotations
-
-from fontTools.subset import usage
-
 from ..smartdevice import SmartDevice
-
+from ...weather import Weather
 
 
 class AirConditioning(SmartDevice):
-    def __init__(self, name: str, env, power_usage_watt: float):
-        super().__init__(name, env, power_usage_watt)
-        self.is_cooling = False
+    def __init__(self, name: str, weather: Weather, power_usage_watt: float, standby_usage_watt: float):
+        super().__init__(name, weather, power_usage_watt, standby_usage_watt)
 
     def update(self, millis_passed: int):
-        if self.is_active:
-            usage = 1.0
-            if self.is_cooling:
-                usage += 4.0 * self.level
-            if not super().env().declare_usage(usage, millis_passed):
-                self.is_cooling = False
-            else:
-                if self.is_cooling:
-                    self.env().weather.apply_cooling(self.power_usage * self.level)
+        if not self.is_active or self.level == 0.0:
+            self.is_on = False
 
-                self.publish_state({
-                    "is_cooling": self.is_cooling,
-                    "power_usage": self.get_power_usage(millis_passed)
-                })
+        if self.is_on:
+            if self.is_on:
+                self.weather.apply_cooling(self.power_usage * self.level)
+        self.publish_state()
 
-    def get_power_usage(self, millis_passed: int) -> float:
-        if not self.is_active or not self.is_cooling:
-            return 0.0
-        return super().get_power_usage(millis_passed)

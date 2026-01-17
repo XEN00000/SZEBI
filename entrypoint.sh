@@ -13,6 +13,7 @@ if [ -n "$POSTGRES_HOST" ]; then
 fi
 
 echo "Apply database migrations"
+pip install -r requirements.txt
 python manage.py migrate --noinput
 
 if [ "$DJANGO_PRODUCTION" = "1" ]; then

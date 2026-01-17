@@ -1,12 +1,14 @@
 from __future__ import annotations
 import math
 from numpy import random
+
+from simulation.logic.src.base.simulation import Simulation
 from simulation.logic.src.base.weather import Weather
 
 
 class OutsideWeather(Weather):
-    def __init__(self, simulation):
-        super().__init__(simulation)
+    def __init__(self, name: str, simulation: Simulation):
+        super().__init__(name, simulation)
 
         self.sunlight: float = 0.0
         self.brightness: float = 0.0

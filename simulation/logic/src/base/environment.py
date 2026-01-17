@@ -1,28 +1,24 @@
 from __future__ import annotations
 
 from simulation.logic.src.base.devices.energysource import EnergySource
-from simulation.logic.src.base.devices.energysources.electricgrid import ElectricGrid
+from simulation.logic.src.base.electricgrid import ElectricGrid
 from simulation.logic.src.base.devices.energysources.energystorage import EnergyStorage
-from simulation.logic.src.base.weatherTypes.insideWeather import InsideWeather
-from simulation.logic.src.base.weatherTypes.outsideWeather import OutsideWeather
 from simulation.logic.src.base.weather import Weather
-from simulation.logic.src.base.device import Device
 
 from simulation.logic.src.util.utils import validate_name
 import paho.mqtt.client as mqtt
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 import weakref
 
 
 class Environment:
     weather: Weather
-    devices: list[Device] = []
     name: str
 
-    def __init__(self, name: str, simulation, inside: bool = False):
+    def __init__(self, name: str, simulation, weather: Weather):
         self._simulation = weakref.ref(simulation)
-        self.weather = InsideWeather(self) if inside else OutsideWeather(self)
+        self.weather = weather
         self.uuid = uuid4()
         self.name = name
         self.mqtt = mqtt.Client(f"env-{self.uuid}")
@@ -36,9 +32,8 @@ class Environment:
         return s
 
     def update(self, millis_passed: int):
-        self.weather.update(millis_passed)
-        for d in self.devices:
-            d.update(millis_passed)
+        self.declared_usage = 0.0
+
 
     def set_name(self, name: str) -> None:
         validate_name(name)

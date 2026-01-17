@@ -2,13 +2,16 @@ from __future__ import annotations
 import math
 import random
 import weakref
-from simulation import Simulation
 from abc import abstractmethod, ABC
 import json
 import paho.mqtt.client as mqtt
 
+from simulation.logic.src.util.utils import validate_name
+
 
 class Weather(ABC):
+    name: str
+
     sunlight: float
     brightness: float
     cloudiness: float
@@ -21,25 +24,23 @@ class Weather(ABC):
 
     # should go into negative if env is being cooled
     curr_heating_power: float
-    isolation: float
 
     wind: float
     wind_trend: float
 
-    def __init__(self, env):
-        self._simulation = weakref.ref(env.sim())
-        self._environment = weakref.ref(env)
+    def __init__(self, name: str, sim):
+        self._simulation = weakref.ref(sim)
+        self.set_name(name)
+
         self.wind_trend: float = random.uniform(-0.05, 0.05)
         self.temp_offset: float = random.uniform(-3.0, 3.0)
 
-    def sim(self):
-        s = self._simulation()
+    def set_name(self, name: str) -> None:
+        validate_name(name)
+        self.name = name
 
-    def env(self):
-        s = self._environment()
-        if s is None:
-            raise RuntimeError('Weather exists outside of Environment context')
-        return s
+    def sim(self):
+        return self._simulation()
 
     def publish_metric(self, metric: str, value, unit=""):
         payload = {
@@ -48,8 +49,8 @@ class Weather(ABC):
             "ts": int(self.sim().get_current_date().timestamp())
         }
 
-        topic = f"szebi/{self.env().uuid}/weather/{metric}"
-        self.env().mqtt.publish(topic, json.dumps(payload), qos=1, retain=True)
+        topic = f"szebi/{self.sim().name}/weathers/{self.name}/{metric}"
+        self.sim().mqtt.publish(topic, json.dumps(payload), qos=1, retain=True)
 
     def update(self, millis: int) -> None:
         self.curr_heating_power = 0
@@ -60,16 +61,18 @@ class Weather(ABC):
         self.update_rainfall(millis)
         self.update_wind(millis)
         self.update_temperature(millis)
-        self.curr_heating_power = 0.0
-        self.curr_lighting_power = 0.0
 
-        self.publish_metric("temperature", self.temperature, "C")
+
         self.publish_metric("temperature", self.temperature, "C")
         self.publish_metric("sunlight", self.sunlight, "")
         self.publish_metric("brightness", self.brightness, "lumen")
         self.publish_metric("cloudiness", self.cloudiness, "percent")
         self.publish_metric("rainfall", self.rainfall, "mmh")
         self.publish_metric("wind", self.wind, "m/s")
+        self.publish_metric("heating_power", self.curr_heating_power, "W")
+        self.publish_metric("lighting_power", self.curr_lighting_power, "W")
+        self.curr_heating_power = 0.0
+        self.curr_lighting_power = 0.0
 
     @abstractmethod
     def update_sunlight(self, millis: int) -> None:
