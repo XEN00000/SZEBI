@@ -3,7 +3,6 @@ from abc import ABC
 from simulation.logic.src.base.device import Device
 import json
 
-from simulation.logic.src.base.simulation import Simulation
 from simulation.logic.src.base.weather import Weather
 
 
@@ -21,8 +20,6 @@ class SmartDevice(Device, ABC):
         self.standby_usage = standby_usage_watt
 
     def set_level(self, level: float):
-        if level < 0.0 or level > 1.0:
-            raise ValueError("Level must be between 0.0 and 1.0")
         self.level = max(0.0, min(1.0, level))
     
     def current_usage_watt(self) -> float:
@@ -39,21 +36,16 @@ class SmartDevice(Device, ABC):
             return 0.0
 
         hours = millis_passed / 3600000
-        return (self.current_usage_watt() * hours) / 1000.0
+        return self.current_usage_watt() * hours
 
     def publish_state(self, extra=None):
-        topic = f"szebi/{self.sim().name}/devices/{self.uuid}/state"
-
         payload = {
-            "name": self.name,
-            "is_active": self.is_active,
             "is_on": self.is_on,
             "level": round(self.level * 100, 1),
             "power_usage": self.current_usage_watt(),
-            "ts": int(self.sim().get_current_date().timestamp())
         }
 
         if extra:
             payload.update(extra)
 
-        self.sim().mqtt.publish(topic, json.dumps(payload), qos=1, retain=True)
+        super().publish_state(payload)

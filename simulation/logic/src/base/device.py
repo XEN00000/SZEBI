@@ -30,16 +30,18 @@ class Device(ABC):
 
 
     def sim(self):
-        s = self.weather.sim()
-        if s is None:
-            raise RuntimeError('Device exists outside of Simulation context')
-        return s
+        if hasattr(self.weather, 'sim'):
+            return self.weather.sim()
+        return self.weather
 
-    def publish_state(self, extra):
-        topic = f"szebi/{self.sim().name}/devices/{self.name}/state"
+    def publish_state(self, extra = None):
+        topic = f"device/state/{self.uuid}"
 
         payload = {
             "name": self.name,
+            "uuid": str(self.uuid),
+            "weather_name": self.weather.get_name(),
+            "weather_uuid": str(self.weather.get_uuid()),
             "type": self.__class__.__name__,
             "is_active": self.is_active,
             "ts": int(self.sim().get_current_date().timestamp())
@@ -48,11 +50,14 @@ class Device(ABC):
         if extra:
             payload.update(extra)
 
-        self.sim().mqtt.publish(topic, json.dumps(payload), qos=1, retain=True)
+        self.sim().publish_state(topic=topic, payload=payload)
+
+    # def try_random_event_shutdown(self):
+    #
 
     @abstractmethod
     def update(self, millis_passed: int) -> None:
-        self.publish_state()
+        pass
 
     def get_uuid(self) -> UUID:
         return self.uuid

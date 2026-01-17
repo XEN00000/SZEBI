@@ -10,9 +10,10 @@ class WindTurbine(EnergyGenerator):
         self.rated_power = rated_power_watt
         self.rated_speed = rated_speed
 
-    def calculate_available_energy(self, millis_passed: int) -> float:
+    def update(self, millis_passed: int) -> None:
         if not self.is_active:
-            return 0.0
+            self.available_energy = 0.0
+            return
         wind = self.weather.get_wind_speed()
 
         if wind <= 0:
@@ -24,7 +25,7 @@ class WindTurbine(EnergyGenerator):
 
         hours = millis_passed / 3600000
         energy_generated = (power * hours)
+        self.available_energy = energy_generated
         self.publish_state({
-            "energy_generated": energy_generated,
+            "rated_speed": self.rated_speed,
         })
-        return energy_generated

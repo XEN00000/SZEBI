@@ -9,7 +9,7 @@ class Heating(SmartDevice):
 
 
     def update(self, millis_passed: int):
-        if not self.is_active or self.level == 0.0:
+        if not self.is_active:
             self.is_on = False
 
         if self.is_on:

@@ -9,3 +9,13 @@ class EnergyGenerator(EnergySource, ABC):
         super().__init__(name, weather)
         self.peak_power = rated_power_watt
 
+    def publish_state(self, extra=None):
+        payload = {
+            "peak_power": self.peak_power,
+        }
+
+        if extra:
+            payload.update(extra)
+
+        super().publish_state(payload)
+

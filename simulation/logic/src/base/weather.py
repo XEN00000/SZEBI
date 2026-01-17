@@ -4,6 +4,8 @@ import random
 import weakref
 from abc import abstractmethod, ABC
 import json
+from uuid import uuid4
+
 import paho.mqtt.client as mqtt
 
 from simulation.logic.src.util.utils import validate_name
@@ -31,7 +33,7 @@ class Weather(ABC):
     def __init__(self, name: str, sim):
         self._simulation = weakref.ref(sim)
         self.set_name(name)
-
+        self.uuid = uuid4()
         self.wind_trend: float = random.uniform(-0.05, 0.05)
         self.temp_offset: float = random.uniform(-3.0, 3.0)
 
@@ -43,14 +45,15 @@ class Weather(ABC):
         return self._simulation()
 
     def publish_metric(self, metric: str, value, unit=""):
+        topic = f"weather/{self.uuid}/{metric}"
         payload = {
+            "weather_name": self.name,
+            "metric_name": metric,
             "value": value,
             "unit": unit,
             "ts": int(self.sim().get_current_date().timestamp())
         }
-
-        topic = f"szebi/{self.sim().name}/weathers/{self.name}/{metric}"
-        self.sim().mqtt.publish(topic, json.dumps(payload), qos=1, retain=True)
+        self.sim().publish_state(topic, payload)
 
     def update(self, millis: int) -> None:
         self.curr_heating_power = 0
@@ -120,3 +123,9 @@ class Weather(ABC):
 
     def get_wind_speed(self) -> float:
         return self.wind
+
+    def get_name(self) -> str:
+        return self.name
+
+    def get_uuid(self) -> str:
+        return str(self.uuid)

@@ -28,8 +28,9 @@ simulation = None
 def index(request):
     return JsonResponse({"status": "success"})
 
+
 @require_http_methods(['GET'])
-def start_simulation (request):
+def start_default_simulation (request):
     global simulation
     simulation = Simulation('simulation-1')
     if simulation is None:
@@ -38,7 +39,7 @@ def start_simulation (request):
         return JsonResponse({"status": "simulation is already running"}, status=400)
 
     simulation.base_millis_per_tick = 15 * 60 * 1000
-    simulation.simulated_millis_per_tick = 5 * 1000
+    simulation.simulated_millis_per_tick = 30 * 1000
 
     outside_weather = OutsideWeather("out1", simulation)
     inside_weather = InsideWeather("in1", simulation, outside_weather)
@@ -105,7 +106,8 @@ def get_simulation_status (request):
             "total_energy_required": simulation.calculate_total_energy_required(simulation.base_millis_per_tick),
             "calculate_total_energy_available": simulation.calculate_total_energy_available(simulation.base_millis_per_tick),
 
-            "consumption_mode": simulation.mode,
+            "consumption_mode": simulation.consumption_mode,
+            "charging_mode": simulation.charging_mode,
             "weathers": weathers_data,
             "devices": [{
                 "name": d.name,
@@ -127,8 +129,17 @@ def get_simulation_status (request):
             "electric_grid": [
 
             ],
-
-
-
         }
     })
+# @require_http_methods('GET')
+# def create_simulation():
+#     global simulation
+#     if simulation is None or not simulation.is_running():
+#         return JsonResponse({"status": "simulation is not running"}, status=400)
+#     if simulation.is_running():
+#         return JsonResponse({"status": "simulation is already running"}, status=400)
+#     name = request.GET['name']
+#     sim = Simulation(name)
+#
+#     sim.base_millis_per_tick = request.GET['base_millis_per_tick']
+#     sim.simulated_millis_per_tick = request.GET['simulated_millis_per_tick']

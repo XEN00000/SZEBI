@@ -8,16 +8,13 @@ class PhotoVoltaic(EnergyGenerator):
     def __init__(self, name: str, weather: Weather, rated_power_watt: float):
         super().__init__(name, weather, rated_power_watt)
 
-    def calculate_available_energy(self, millis_passed: int) -> float:
+    def update(self, millis_passed: int) -> None:
         if not self.is_active:
-            return 0.0
+            self.available_energy = 0.0
+            return
 
-        brightness = self.weather.get_brightness()
-        power = self.peak_power * brightness
-
+        power = self.peak_power * self.weather.get_brightness()
         hours = millis_passed / 3600000
         energy_generated = (power * hours)
-        self.publish_state({
-            "energy_generated": energy_generated
-        })
-        return energy_generated
+        self.available_energy = energy_generated
+        self.publish_state()

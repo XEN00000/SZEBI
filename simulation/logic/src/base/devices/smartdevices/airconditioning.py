@@ -8,11 +8,10 @@ class AirConditioning(SmartDevice):
         super().__init__(name, weather, power_usage_watt, standby_usage_watt)
 
     def update(self, millis_passed: int):
-        if not self.is_active or self.level == 0.0:
+        if not self.is_active:
             self.is_on = False
 
         if self.is_on:
-            if self.is_on:
-                self.weather.apply_cooling(self.power_usage * self.level)
+            self.weather.apply_cooling(self.power_usage * self.level)
         self.publish_state()
 

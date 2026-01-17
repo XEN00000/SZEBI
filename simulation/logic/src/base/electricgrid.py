@@ -12,15 +12,13 @@ class ElectricGrid(EnergySource):
             raise ValueError("Connection power must be reasonable, so between 100W and 1MW")
         self.connection_power = connection_power
 
-    def calculate_required_energy(self, millis_passed: int) -> float:
-        return 0.0
-
-    def calculate_available_energy(self, millis_passed: int) -> float:
-        hours = millis_passed / 3600000
-        return (self.connection_power * hours) / 1000.0
+    def get_available_energy(self) -> float:
+        return self.available_energy
 
     def update(self, millis_passed: int) -> None:
-        pass
+        hours = millis_passed / 3600000
+        self.available_energy = self.connection_power * hours
+        self.publish_state()
 
     def supply(self, needed_kwh: float) -> float:
         self.count_consumption(needed_kwh)
@@ -28,4 +26,8 @@ class ElectricGrid(EnergySource):
 
     # wyslac do bazy danych / do mqtt w zaleznosci od tego co chca
     def count_consumption(self, consumed_kwh: float) -> float:
-        pass
+        cost = consumed_kwh * self.price_per_kwh
+        self.publish_state({
+            "consumed_kwh": consumed_kwh,
+            "cost": cost
+        })

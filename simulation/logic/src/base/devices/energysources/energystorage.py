@@ -9,21 +9,32 @@ class EnergyStorage(EnergySource):
         super().__init__(name, weather)
         self.capacity = capacity_watts
         self.charge = 0.0 # watts
-        self.max_charge = max_charge_watts
-        self.max_discharge = max_discharge_watts
+        self.max_charge_power = max_charge_watts
+        self.max_discharge_power = max_discharge_watts
+        self.max_energy_can_take = 0.0
 
-    def charge_battery(self, supplied_watts: float, millis: float) -> float:
-        hours = millis / 3600000
-        accepted = min(self.capacity - self.charge, self.max_charge * hours, supplied_watts)
+    def charge_battery(self, supplied_watthours: float) -> float:
+        if not self.is_active:
+            return 0.0
+        accepted = min(self.max_energy_can_take, supplied_watthours)
+        self.max_energy_can_take -= accepted
         self.charge += accepted
         return accepted
 
-    def discharge_battery(self, needed_watts: float, millis: float) -> float:
-        hours = millis / 3600000
-        provided = min(self.charge, self.max_discharge * hours, needed_watts)
-        self.charge -= provided
-        return provided
+    def get_max_energy_can_take(self) -> float:
+        return self.max_energy_can_take
 
-    def calculate_available_energy(self, millis_passed: int) -> float:
+    def update(self, millis_passed: int) -> None:
+        if not self.is_active:
+            self.available_energy = 0.0
+            return
         hours = millis_passed / 3600000
-        return min((self.max_discharge * hours), self.charge)
+        self.available_energy = min((self.max_discharge_power * hours), self.charge)
+        self.max_energy_can_take = min((self.max_charge_power * hours), self.capacity - self.charge)
+        self.publish_state({
+            "capacity": self.capacity,
+            "charge": self.charge,
+            "max_charge_power": self.max_charge_power,
+            "max_discharge_power": self.max_discharge_power,
+            "max_energy_can_take": self.max_energy_can_take,
+        })

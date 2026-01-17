@@ -28,16 +28,6 @@ services:
       - ./mosquitto/config:/mosquitto/config
       - ./mosquitto/data:/mosquitto/data
       - ./mosquitto/log:/mosquitto/log
-  mqtt-client:
-    image: efrecon/mqtt-client
-    command: >
-      sub
-      -h mqtt
-      -t "#"
-      -v
-    stdin_open: true      # equivalent of -i
-    tty: true             # equivalent of -t
-    restart: "no"         # don't restart automatically (similar to --rm)
   web:
     build:
       context: .
