@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
@@ -7,6 +8,7 @@ import AlarmsPage from './pages/AlarmsPage';
 import LoginPage from './pages/LoginPage';
 import AnalysisDashboard from './pages/AnalysisDashboard.jsx';
 import AcquisitionPage from './pages/AcquisitionPage';
+import Forecasting from "./pages/Forecasting.jsx";
 import OptimalizationPage from './pages/OptimalizationPage';
 
 const ROLES = {
@@ -40,7 +42,7 @@ function App() {
           <Route element={<ProtectedRoute user={user} allowedRoles={[ROLES.ADMIN, ROLES.MAINTENANCE]} />}>
             <Route path="acquisition" element={<AcquisitionPage />} />
             <Route path="analysis" element={<AnalysisDashboard />} />
-            <Route path="forecasting" element={<div className="p-8 text-center text-gray-400">Moduł Prognozowania</div>} />
+            <Route path="forecasting" element={<Forecasting user={user} />} />
             <Route path="alarms" element={<AlarmsPage />} />
           </Route>
 
