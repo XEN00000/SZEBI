@@ -25,52 +25,52 @@ class OptimizationController:
     # ---------------------------
     def _build_simulation_command(self, base: dict, *, reason: str | None = None) -> dict:
         """
-        Ujednolica payload przekazywany do SimulationClient.publish_command().
+        Mapuje wewnętrzny wynik algorytmu (status/power_limit/target_value)
+        na format rozumiany przez symulację:
 
-        publish_command() powinien dostać prosty dict z komendą, np:
-          {"status": "OFF", "power_limit": 0, "reason": "..."}
-
-        Ta metoda pilnuje:
-        - domyślnych pól
-        - typów
-        - nie wysyłamy "dziwnych" kluczy, których symulacja może nie znać
+        - is_active: bool
+        - is_on: bool
+        - level: 0.0..1.0   (dla SMART_DEVICE: ogrzewanie/klima/światło)
         """
         base = dict(base or {})
+        status = str(base.get("status", "ON")).upper()
+        power_limit = base.get("power_limit", 100)
 
-        # Minimalny, bezpieczny zestaw pól
-        cmd = {
-            "status": str(base.get("status", "ON")).upper(),
-            "power_limit": int(base.get("power_limit", 100)),
-        }
+        # power_limit 0..100 -> level 0.0..1.0
+        try:
+            power_limit = int(power_limit)
+        except (TypeError, ValueError):
+            power_limit = 100
+        power_limit = max(0, min(100, power_limit))
+        level = power_limit / 100.0
 
-        # target_value jest opcjonalne (np. HVAC)
-        if "target_value" in base and base["target_value"] is not None:
-            try:
-                cmd["target_value"] = float(base["target_value"])
-            except (TypeError, ValueError):
-                pass
+        # Domyślnie: urządzenie aktywne
+        cmd = {"is_active": True}
 
-        # reason – pole diagnostyczne (bezpieczne, bo string)
+        # Mapowanie statusów na is_on/level
+        if status == "OFF":
+            cmd["is_active"] = False      # pełne wyłączenie (jak opisał kolega)
+            cmd["is_on"] = False
+            cmd["level"] = 0.0
+        elif status in ("ECONOMY", "ON"):
+            cmd["is_on"] = True
+            cmd["level"] = level
+        else:
+            # nieznany status -> zachowaj bezpiecznie
+            cmd["is_on"] = True
+            cmd["level"] = level
+
+        # Opcjonalnie diagnostyka (jeśli symulacja to toleruje)
+        # Jak chcesz 100% zgodność z opisem kolegi, to usuń te 2 linie.
         if reason:
             cmd["reason"] = reason
-        elif "reason" in base and base["reason"] is not None:
-            cmd["reason"] = str(base["reason"])
-
-        # Wymuś zakres mocy 0..100
-        if cmd["power_limit"] < 0:
-            cmd["power_limit"] = 0
-        if cmd["power_limit"] > 100:
-            cmd["power_limit"] = 100
 
         return cmd
 
-    def _send_to_simulation(self, device_id: int, command: dict) -> bool:
-        """
-        Jedno miejsce wysyłki komend do symulacji (MQTT).
-        """
-        ok = self.simulation_client.publish_command(device_id, command)
+    def _send_to_simulation(self, device_uuid: str, command: dict) -> bool:
+        ok = self.simulation_client.publish_command(device_uuid, command)
         if not ok:
-            print(f"[CONTROLLER][WARN] publish_command() zwróciło False dla device_id={device_id}")
+            print(f"[CONTROLLER][WARN] publish_command() zwróciło False dla uuid={device_uuid}")
         return ok
 
     # ---------------------------
@@ -91,7 +91,6 @@ class OptimizationController:
         if str(priority).upper() == "CRITICAL":
             print("[CONTROLLER] -> ALARM KRYTYCZNY! Analizuję cel...")
 
-            # TODO: później mapowanie metric -> device_id (np. z repozytorium urządzeń)
             target_device_id = 1
 
             print(f"[CONTROLLER] -> Wysyłam Emergency Shutdown dla ID={target_device_id}")
@@ -104,7 +103,8 @@ class OptimizationController:
                 raw_cmd,
                 reason=f"EXTERNAL_ALARM_CRITICAL metric={metric} value={value}"
             )
-            self._send_to_simulation(target_device_id, cmd)
+            # self._send_to_simulation(target_device_id, cmd)
+            self.run_optimization_cycle()  # tymczasowo uruchamiamy cykl optymalizacji
         else:
             print("[CONTROLLER] -> Alarm niekrytyczny. Loguję i ignoruję.")
 
@@ -191,18 +191,19 @@ class OptimizationController:
         failed_count = 0
 
         for device in devices:
-            device_id = getattr(device, "id", None)
+            # device_id = getattr(device, "id", None)
+            device_uuid = getattr(device, "uuid", None)
             device_name = getattr(device, "name", str(device))
 
-            print(f"\n--- Przetwarzanie urządzenia: {device_name} (id={device_id}) ---")
+            print(f"\n--- Przetwarzanie urządzenia: {device_name} (uuid={device_uuid}) ---")
 
-            if device_id is None:
-                print("   [ERROR] Urządzenie nie ma id -> pomijam.")
+            if device_uuid is None:
+                print("   [ERROR] Urządzenie nie ma uuid -> pomijam.")
                 failed_count += 1
                 continue
 
             try:
-                preference = self.pref_repo.get_preference_for_device(device_id)
+                preference = self.pref_repo.get_preference_for_device(device_uuid)
                 if preference is None:
                     print("   [INFO] Brak preferencji -> algorytm użyje domyślnych.")
 
@@ -222,7 +223,7 @@ class OptimizationController:
 
                 print(f"   [WYNIK] Komenda do symulacji: {cmd}")
 
-                ok = self._send_to_simulation(device_id, cmd)
+                ok = self._send_to_simulation(device_uuid, cmd)
                 if ok:
                     processed_count += 1
                 else:

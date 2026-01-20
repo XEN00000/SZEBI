@@ -25,8 +25,10 @@ class DeviceCache:
 
     def active(self) -> List[Dict[str, Any]]:
         with self._lock:
-            return [p for p in self._by_uuid.values() if p.get("is_active") is True]
-
+            return [
+                p for p in self._by_uuid.values()
+                if (p.get("is_active") is True) or (p.get("active") is True)
+            ]
 
 # singleton na cały proces Django
 device_cache = DeviceCache()
