@@ -86,3 +86,9 @@
     background-size: 16px;
     padding-right: 36px;
 }
+
+.error-message {
+    color: #dc2626;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}

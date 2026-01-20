@@ -41,7 +41,6 @@ def _parse_metric_list(metric_str: str):
     return [Measurement(metric_str)]
 
 
-
 def test_statistics(request):
     try:
         end = timezone.now()
@@ -88,7 +87,6 @@ def report_pdf_view(request):
         pdf_bytes = reporting.createPdf(df)
 
         response = HttpResponse(pdf_bytes, content_type="application/pdf")
-        response["Content-Disposition"] = 'attachment; filename="report.pdf"'
         return response
 
     except Exception as e:
@@ -155,22 +153,9 @@ def plot_png_save_view(request):
         df = stats.calculateStatistics(room, start, end, metric_list)
         png_bytes = reporting.createPng(df)
 
-        report_type = ReportType(df.iloc[0]["period"]) if not df.empty else ReportType.DAILY
-        metric_value = metric_list[0].value if metric_list else None
-
-        elem = StatisticElement(
-            periodStart=start,
-            periodEnd=end,
-            createdBy=request.user if request.user.is_authenticated else None,
-            reportType=report_type,
-            roomId=room,
-            metric=metric_value,
-            fileType=FileType.PNG,
-            fileContent=png_bytes,
-        )
-        dm.saveArchivedReport(elem)
-
-        return HttpResponse(png_bytes, content_type="image/png")
+        response = HttpResponse(png_bytes, content_type="image/png")
+        response["Content-Disposition"] = 'attachment; filename="plot_saved.png"'
+        return response
 
     except Exception as e:
         return HttpResponseBadRequest(str(e))
@@ -186,8 +171,8 @@ def archived_reports_list_view(request):
         metric_str = request.GET.get("metric")  # może być None
 
         report_type = ReportType(report_type_str)
-        start = _parse_dt(start_str)
-        end = _parse_dt(end_str)
+        start = _parse_dt(start_str) if start_str else timezone.now() - timezone.timedelta(days=1)
+        end = _parse_dt(end_str) if end_str else timezone.now()
         metric_list = _parse_metric_list(metric_str) if metric_str else None
 
         reports = controller.getArchivedReportsList(

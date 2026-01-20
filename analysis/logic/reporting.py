@@ -47,36 +47,61 @@ class Reporting:
 
     def createPdf(self, statistics: pd.DataFrame) -> bytes:
         buffer = io.BytesIO()
-        pdf = canvas.Canvas(buffer)
+        pdf = canvas.Canvas(buffer, pagesize=(595, 842))
         y = 800
+        line_height = 18
+        bottom_margin = 50
 
-        pdf.drawString(50, y, "SZEBI - Analysis report")
+        pdf.setFont("Helvetica-Bold", 16)
+        pdf.drawString(50, y, "SZEBI - Analysis Report")
         y -= 30
 
         if statistics.empty:
-            pdf.drawString(50, y, "Brak danych.")
+            pdf.setFont("Helvetica", 12)
+            pdf.drawString(50, y, "No data available.")
             pdf.save()
             buffer.seek(0)
             return buffer.read()
 
         for _, row in statistics.iterrows():
+            pdf.setFont("Helvetica-Bold", 12)
             pdf.drawString(
                 50,
                 y,
-                f"Room={row['room_id']} metric={row['metric']} mean={row['mean']} min={row['min']} max={row['max']} ({row['unit']})",
+                f"Room: {row['room_id']} | Metric: {row['metric']} | Unit: ({row['unit']})"
             )
-            y -= 18
+            y -= line_height
+
+            pdf.setFont("Helvetica", 11)
+            pdf.drawString(
+                60,
+                y,
+                f"Mean: {row['mean']} | Min: {row['min']} | Max: {row['max']}"
+            )
+            y -= line_height
+
 
             data_df = row["data"]
             if hasattr(data_df, "empty") and not data_df.empty:
-                for _, r in data_df.tail(5).iterrows():
-                    pdf.drawString(70, y, f"- {r['timestamp']}: {r['value']}")
+                if y < bottom_margin:
+                    pdf.showPage()
+                    y = 800
+                pdf.setFont("Helvetica-Bold", 10)
+                pdf.drawString(60, y, "Measurements:")
+                y -= line_height
+
+                for _, r in data_df.iterrows():
+                    if y < bottom_margin:
+                        pdf.showPage()
+                        y = 800
+                    pdf.setFont("Helvetica", 10)
+                    pdf.drawString(70, y, f"- {r['timestamp']}: ")
+                    timestamp_width = pdf.stringWidth(f"- {r['timestamp']}: ", "Helvetica", 10)
+                    pdf.setFont("Helvetica-Bold", 10)
+                    pdf.drawString(70 + timestamp_width, y, str(r['value']))
                     y -= 14
 
             y -= 10
-            if y < 120:
-                pdf.showPage()
-                y = 800
 
         pdf.save()
         buffer.seek(0)

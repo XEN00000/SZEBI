@@ -12,7 +12,6 @@ urlpatterns = [
     path("plot/", views.plot_png_view),
     path("plot/save/", views.plot_png_save_view),
 
-    # archiwum
     path("archive/list/", views.archived_reports_list_view),
     path("archive/<str:report_id>/", views.archived_report_download_view),
 ]

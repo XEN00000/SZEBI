@@ -46,6 +46,7 @@ class Controller:
             fileContent=pdf_bytes,
         )
         self.dataManager.saveArchivedReport(report)
+
         return pdf_bytes
 
     def getArchivedReportsList(

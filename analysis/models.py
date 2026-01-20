@@ -3,6 +3,8 @@ from uuid import uuid4
 from django.conf import settings
 
 from .logic.enums import ReportType, Measurement
+
+
 class Report(models.Model):
     title = models.CharField(max_length=200)
     generated_at = models.DateTimeField(auto_now_add=True)
@@ -12,10 +14,11 @@ class Report(models.Model):
         return self.title
 
 
-
 class FileType(models.TextChoices):
     PDF = "PDF"
     PNG = "PNG"
+
+
 class StatisticElement(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
 

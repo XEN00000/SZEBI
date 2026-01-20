@@ -12,10 +12,14 @@ class ReportType(models.TextChoices):
 
 class MeasurementUnit(models.TextChoices):
     CELSIUS = "celsius"
-    FAHRENHEIT = "fahrenheit"
+    LUX = "lux"
+    LUMEN = "lumen"
     PERCENT = "percent"
+    MMH = "mmh"
+    MPS = "mps"
     KILOWATT_HOUR = "kilowatt-hour"
     WATT = "watt"
+    VOLT = "volt"
     NONE = "none"
 
 
@@ -25,3 +29,8 @@ class Measurement(models.TextChoices):
     ENERGY = "energy"
     POWER = "power"
     VOLTAGE = "voltage"
+    SUNLIGHT = "sunlight"
+    BRIGHTNESS = "brightness"
+    CLOUDINESS = "cloudiness"
+    RAINFALL = "rainfall"
+    WIND = "wind"
