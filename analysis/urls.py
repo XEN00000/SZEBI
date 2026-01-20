@@ -1,10 +1,17 @@
+# analysis/urls.py
 from django.urls import path
-from .views import test_statistics, statistics_view, report_pdf_view, plot_png_view
-
+from . import views
 
 urlpatterns = [
-    path("test/", test_statistics),
-    path("statistics/", statistics_view),
-    path("report/", report_pdf_view),
-    path("plot/", plot_png_view)
+    path("test/", views.test_statistics),
+    path("statistics/", views.statistics_view),
+
+    path("report/", views.report_pdf_view),
+    path("report/save/", views.report_pdf_save_view),
+
+    path("plot/", views.plot_png_view),
+    path("plot/save/", views.plot_png_save_view),
+
+    path("archive/list/", views.archived_reports_list_view),
+    path("archive/<str:report_id>/", views.archived_report_download_view),
 ]

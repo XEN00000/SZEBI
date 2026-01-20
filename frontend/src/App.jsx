@@ -5,6 +5,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
 import AlarmsPage from './pages/AlarmsPage';
 import LoginPage from './pages/LoginPage';
+import AnalysisDashboard from './pages/AnalysisDashboard.jsx';
 import AcquisitionPage from './pages/AcquisitionPage';
 import OptimalizationPage from './pages/OptimalizationPage';
 
@@ -38,7 +39,7 @@ function App() {
 
           <Route element={<ProtectedRoute user={user} allowedRoles={[ROLES.ADMIN, ROLES.MAINTENANCE]} />}>
             <Route path="acquisition" element={<AcquisitionPage />} />
-            <Route path="analysis" element={<div className="p-8 text-center text-gray-400">Moduł Analizy i Raportowania</div>} />
+            <Route path="analysis" element={<AnalysisDashboard />} />
             <Route path="forecasting" element={<div className="p-8 text-center text-gray-400">Moduł Prognozowania</div>} />
             <Route path="alarms" element={<AlarmsPage />} />
           </Route>
