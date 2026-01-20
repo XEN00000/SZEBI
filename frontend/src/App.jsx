@@ -7,6 +7,7 @@ import AlarmsPage from './pages/AlarmsPage';
 import LoginPage from './pages/LoginPage';
 import AnalysisDashboard from './pages/AnalysisDashboard.jsx';
 import AcquisitionPage from './pages/AcquisitionPage';
+import OptimalizationPage from './pages/OptimalizationPage';
 
 const ROLES = {
   ADMIN: 'building_admin',
@@ -44,7 +45,7 @@ function App() {
           </Route>
 
           <Route element={<ProtectedRoute user={user} allowedRoles={[ROLES.ADMIN, ROLES.MAINTENANCE, ROLES.WORKER]} />}>
-            <Route path="optimization" element={<div className="p-8 text-center text-gray-400">Moduł Optymalizacji i Sterowania</div>} />
+            <Route path="optimization" element={<OptimalizationPage userRole={user?.role} userId={user?.id} />} />
           </Route>
 
           <Route path="*" element={<div className="p-8 text-center text-gray-400">404 - Strona nie odnaleziona</div>} />
