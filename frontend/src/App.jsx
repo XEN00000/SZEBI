@@ -37,8 +37,8 @@ function App() {
 
           <Route element={<ProtectedRoute user={user} allowedRoles={[ROLES.ADMIN, ROLES.MAINTENANCE]} />}>
             <Route path="acquisition" element={<AcquisitionPage />} />
-            <Route path="analysis" element={<Forecasting/>} />
-            <Route path="forecasting" element={<div className="p-8 text-center text-gray-400">Moduł Prognozowania</div>} />
+            <Route path="analysis" element={<AnalysisDashboard />} />
+            <Route path="forecasting" element={<Forecasting/>} />
             <Route path="alarms" element={<div className="p-8 text-center text-gray-400">Moduł Alarmów i Utrzymania</div>} />
           </Route>
 

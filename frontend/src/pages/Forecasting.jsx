@@ -36,7 +36,6 @@ const Forecasting = ({ user }) => {
         fetchLatestForecast();
     }, [fetchLatestForecast]);
 
-    // Akcja Inżyniera (Scenariusz: image_89eb10.png)
     const handleTrainModels = async () => {
         setIsProcessing(true);
         setStatusMessage("Inżynier: Trwa przygotowanie danych historycznych i trenowanie modeli...");
@@ -55,7 +54,6 @@ const Forecasting = ({ user }) => {
         }
     };
 
-    // Akcja Administratora (Scenariusz: image_89eb67.png)
     const handleGenerateForecast = async () => {
         setIsProcessing(true);
         setStatusMessage("Administrator: PredictionManager generuje nową prognozę...");
