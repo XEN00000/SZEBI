@@ -207,10 +207,9 @@ def archived_report_download_view(request, report_id: str):
         rid = UUID(report_id)
         content = controller.getArchivedReport(rid)
 
-        elem = dm.getArchivedReport(rid)
-        if elem.fileType == FileType.PNG:
-            return HttpResponse(content, content_type="image/png")
-        return HttpResponse(content, content_type="application/pdf")
+        response = HttpResponse(content, content_type="application/pdf")
+        response["Content-Disposition"] = 'attachment; filename="archived_report_saved.pdf"'
+        return response
 
     except Exception as e:
         return HttpResponseBadRequest(str(e))
