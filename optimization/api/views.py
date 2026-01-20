@@ -5,7 +5,7 @@ from rest_framework import status
 
 from optimization.models import OptimizationRule, UserPreference
 from optimization.logic.controller import OptimizationController
-# from optimization.integration.repositories import DeviceRepository
+from optimization.integration.repositories import DeviceRepository
 
 from .serializers import (
     ExternalAlarmSerializer,     
@@ -32,12 +32,12 @@ class AlarmWebhookView(APIView):
             
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-#class DeviceListView(APIView):
- #   def get(self, request):
-  #      repo = DeviceRepository()
-   #     devices = repo.get_all_active_devices()
-    #    serializer = DeviceSerializer(devices, many=True)
-     #   return Response(serializer.data)
+class DeviceListView(APIView):
+   def get(self, request):
+       repo = DeviceRepository()
+       devices = repo.get_all_active_devices()
+       serializer = DeviceSerializer(devices, many=True)
+       return Response(serializer.data)
 
 class RunOptimizationView(APIView):
     def post(self, request):

@@ -11,6 +11,7 @@ class WindTurbine(EnergyGenerator):
         self.rated_speed = rated_speed
 
     def update(self, millis_passed: int) -> None:
+        super().update(millis_passed)
         if not self.is_active:
             self.available_energy = 0.0
             return

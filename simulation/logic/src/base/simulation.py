@@ -35,7 +35,7 @@ class Simulation:
         self.devices: list[SmartDevice] = []
         self.energy_storages: list[EnergyStorage] = []
         self.energy_generators: list[EnergyGenerator] = []
-        self.electric_grid: ElectricGrid = ElectricGrid(self, 5000)
+        self.electric_grid: ElectricGrid = None
 
         #       self.consumption: can be configured by MQTT. Is a string containing energy source types in order where:
         #           - "R" stands for "renewables" and represents our own energy generators
@@ -131,8 +131,6 @@ class Simulation:
         if self.running:
             raise RuntimeError('simulation is already running')
         self.running = True
-        # self.mqtt.subscribe(f"szebi/{self.name}/devices/+/set", qos=1)
-        # self.mqtt.on_message = self.on_mqtt_message
         self._thread = threading.Thread(target=self._run_loop, daemon=True)
         self._thread.start()
 
@@ -197,7 +195,8 @@ class Simulation:
             d.update(millis)
         for d in self.energy_generators:
             d.update(millis)
-        self.electric_grid.update(millis)
+        if self.electric_grid is not None:
+            self.electric_grid.update(millis)
 
         # 3) Calculate total energy produced in that tick.
         total_energy_produced = 0.0
@@ -209,7 +208,10 @@ class Simulation:
         for es in self.energy_storages:
             available_energy_from_storage += es.get_available_energy()
 
-        available_grid_energy = self.electric_grid.get_available_energy()
+        available_grid_energy = 0.0
+        if self.electric_grid is not None:
+            self.electric_grid.get_available_energy()
+
 
         total_available_energy = (total_energy_produced if 'R' in self.consumption_mode else 0.0) \
                                  + (available_energy_from_storage if 'S' in self.consumption_mode else 0.0) \
@@ -286,11 +288,12 @@ class Simulation:
     def calculate_total_energy_available(self, millis: int) -> float:
         total_energy_produced = 0.0
         available_energy_from_storage = 0.0
-        available_grid_energy = self.electric_grid.calculate_available_energy(millis)
+        if self.electric_grid is not None:
+            available_grid_energy = self.electric_grid.get_available_energy()
         for eg in self.energy_generators:
-            total_energy_produced += eg.get_available_energy(millis)
+            total_energy_produced += eg.get_available_energy()
         for es in self.energy_storages:
-            available_energy_from_storage += es.get_available_energy(millis)
+            available_energy_from_storage += es.get_available_energy()
 
         return (total_energy_produced if 'R' in self.consumption_mode else 0.0) \
                                  + (available_energy_from_storage if 'S' in self.consumption_mode else 0.0) \
@@ -308,7 +311,8 @@ class Simulation:
                 sources.append(self.electric_grid)
 
         for s in sources:
-            energy_consumed += s.consume_energy(total_energy_required)
+            if s is not None:
+                energy_consumed += s.consume_energy(total_energy_required)
         return energy_consumed
 
     def is_running(self) -> bool:
@@ -344,12 +348,19 @@ class Simulation:
         self.name = name
 
     def publish_state(self, topic: str, extra=None):
-        topic = f"{self.name}/" + topic
-
-        payload = {}
+        payload = {
+            "ts": int(self.get_current_date().timestamp())
+        }
 
         if extra:
             payload.update(extra)
 
-        self.mqtt.publish(topic, json.dumps(payload), qos=1, retain=True)
+        self.mqtt.publish(self.build_topic(topic), json.dumps(payload), qos=1)
 
+    def subscribe(self, topic: str, on_message):
+        topic = self.build_topic(topic)
+        self.mqtt.subscribe(topic)
+        self.mqtt.message_callback_add(topic, on_message)
+
+    def build_topic(self, topic: str):
+        return f"{self.name}/{topic}"

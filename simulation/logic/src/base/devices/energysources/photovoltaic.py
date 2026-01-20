@@ -9,6 +9,7 @@ class PhotoVoltaic(EnergyGenerator):
         super().__init__(name, weather, rated_power_watt)
 
     def update(self, millis_passed: int) -> None:
+        super().update(millis_passed)
         if not self.is_active:
             self.available_energy = 0.0
             return

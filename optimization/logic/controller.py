@@ -1,5 +1,5 @@
 from optimization.integration.repositories import  RuleRepository, UserPreferenceRepository
-from optimization.integration.clients import ForecastClient, SimulationClient
+from optimization.integration.clients import DeviceRepository, ForecastClient, SimulationClient
 from optimization.logic.algorithm import calculate_optimal_settings
 
 class OptimizationController:
@@ -9,7 +9,7 @@ class OptimizationController:
     """
     def __init__(self):
         # Wstrzykiwanie zależności (Repositories & Clients)
-        #self.device_repo = DeviceRepository()
+        self.device_repo = DeviceRepository()
         self.rule_repo = RuleRepository()
         self.pref_repo = UserPreferenceRepository()
         

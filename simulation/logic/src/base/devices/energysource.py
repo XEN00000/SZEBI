@@ -8,6 +8,7 @@ class EnergySource(Device, ABC):
     def __init__(self, name: str, weather: Weather):
         super().__init__(name, weather)
         self.available_energy = 0.0
+        self.provided_energy = 0.0
 
     def get_available_energy(self) -> float:
         return self.available_energy
@@ -17,7 +18,11 @@ class EnergySource(Device, ABC):
             return 0.0
         provided = min(self.available_energy, requested_watthours)
         self.available_energy -= provided
+        self.provided_energy += provided
         return provided
+
+    def update(self, millis_passed: int) -> None:
+        self.provided_energy = 0.0
 
     def publish_state(self, extra=None):
         payload = {

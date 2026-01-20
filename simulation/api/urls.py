@@ -6,7 +6,7 @@ urlpatterns = [
     path('', views.index, name="index"),
     path('create', views.create_simulation, name="create"),
     path('start', views.start_simulation, name="start_created"),
-    path('startdefault', views.start_default_simulation, name="start_default"),
+    path('start_default', views.start_default_simulation, name="start_default"),
     path('stop', views.stop_simulation, name="stop"),
     path('status', views.get_simulation_status, name="status"),
     
@@ -16,8 +16,8 @@ urlpatterns = [
     path('device/remove/<uuid:device_uuid>', views.remove_device, name="device_remove"),
 
     path('weather/list', views.list_weathers, name="weather_list"),
-    path('weather/status/<weather_uuid>', views.weather_status, name="weather_status"),
+    path('weather/status/<uuid:weather_uuid>', views.weather_status, name="weather_status"),
     path('weather/add', views.add_weather, name="weather_add"),
-    path('weather/remove/weather_uuid>', views.remove_weather, name="weather_remove"),
+    path('weather/remove/<uuid:weather_uuid>', views.remove_weather, name="weather_remove"),
 
 ]

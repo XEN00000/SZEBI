@@ -4,6 +4,7 @@ from simulation.logic.src.base.device import Device
 import json
 
 from simulation.logic.src.base.weather import Weather
+from simulation.logic.src.util.utils import parse_bool
 
 
 class SmartDevice(Device, ABC):
@@ -18,6 +19,23 @@ class SmartDevice(Device, ABC):
         self.is_on = False
         self.power_usage = power_usage_watt
         self.standby_usage = standby_usage_watt
+
+    def on_mqtt_message(self, client, userdata, msg):
+        super().on_mqtt_message(client, userdata, msg)
+        try:
+            data = json.loads(msg.payload)
+
+            is_on = parse_bool(data.get("is_on"))
+            level = float(data.get("level", None))
+
+            if is_on is not None:
+                self.is_on = is_on
+            if level is not None:
+                self.set_level(max(min(level, 1.0), 0.0))
+        except Exception as e:
+            client.publish(f'{msg.topic}/response',
+                           f"{type(e).__name__}: {e}", qos=1)
+            pass
 
     def set_level(self, level: float):
         self.level = max(0.0, min(1.0, level))
@@ -41,7 +59,7 @@ class SmartDevice(Device, ABC):
     def publish_state(self, extra=None):
         payload = {
             "is_on": self.is_on,
-            "level": round(self.level * 100, 1),
+            "level": self.level,
             "power_usage": self.current_usage_watt(),
         }
 

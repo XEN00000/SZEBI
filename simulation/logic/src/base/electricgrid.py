@@ -4,8 +4,8 @@ from simulation.logic.src.base.weather import Weather
 
 
 class ElectricGrid(EnergySource):
-    def __init__(self, sim, connection_power: float, price_per_kwh: float = 0.8):
-        super().__init__("electric-grid", sim)
+    def __init__(self, weather: Weather, connection_power: float, price_per_kwh: float = 0.8):
+        super().__init__("electric-grid", weather)
         self.price_per_kwh = price_per_kwh
 
         if connection_power < 100 or connection_power > 1000000:
@@ -16,18 +16,19 @@ class ElectricGrid(EnergySource):
         return self.available_energy
 
     def update(self, millis_passed: int) -> None:
+        if not self.is_active:
+            return
         hours = millis_passed / 3600000
         self.available_energy = self.connection_power * hours
         self.publish_state()
 
-    def supply(self, needed_kwh: float) -> float:
-        self.count_consumption(needed_kwh)
-        return needed_kwh
-
-    # wyslac do bazy danych / do mqtt w zaleznosci od tego co chca
-    def count_consumption(self, consumed_kwh: float) -> float:
-        cost = consumed_kwh * self.price_per_kwh
+    def supply(self, needed_watthours: float) -> float:
+        if not self.is_active:
+            return 0.0
+        consumed_watthours = min(needed_watthours, self.available_energy)
+        self.available_energy -= consumed_watthours
         self.publish_state({
-            "consumed_kwh": consumed_kwh,
-            "cost": cost
+            "consumed_watthours": consumed_watthours,
         })
+        return consumed_watthours
+        # TODO: wpis do bazy danych ile pradu zuzyto

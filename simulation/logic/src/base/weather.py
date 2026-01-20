@@ -51,7 +51,6 @@ class Weather(ABC):
             "metric_name": metric,
             "value": value,
             "unit": unit,
-            "ts": int(self.sim().get_current_date().timestamp())
         }
         self.sim().publish_state(topic, payload)
 

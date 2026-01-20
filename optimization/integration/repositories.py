@@ -1,5 +1,5 @@
 from optimization.models import OptimizationRule, UserPreference
-# from simulation.models import Device
+from simulation.models import Device
 
 class RuleRepository:
     """
@@ -21,9 +21,9 @@ class UserPreferenceRepository:
     def get_preference_for_device(self, device_id):
         return UserPreference.objects.filter(device_id=device_id).first()
 
-# class DeviceRepository:
-#     """
-#     Dostęp do urządzeń (z modułu symulacji).
-#     """
-#     def get_all_active_devices(self):
-#         return Device.objects.filter(is_active=True)
+class DeviceRepository:
+    """
+    Dostęp do urządzeń (z modułu symulacji).
+    """
+    def get_all_active_devices(self):
+        return Device.objects.filter(is_active=True)
