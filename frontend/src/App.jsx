@@ -42,7 +42,7 @@ function App() {
           <Route element={<ProtectedRoute user={user} allowedRoles={[ROLES.ADMIN, ROLES.MAINTENANCE]} />}>
             <Route path="acquisition" element={<AcquisitionPage />} />
             <Route path="analysis" element={<AnalysisDashboard />} />
-            <Route path="forecasting" element={<Forecasting/>} />
+            <Route path="forecasting" element={<Forecasting user={user} />} />
             <Route path="alarms" element={<AlarmsPage />} />
           </Route>
 
