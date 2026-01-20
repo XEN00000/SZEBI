@@ -15,11 +15,16 @@ class Report(models.Model):
 
 
 class FileType(models.TextChoices):
+    # Lista dozwolonych typów plików zapisywanych w archiwum
     PDF = "PDF"
     PNG = "PNG"
 
 
 class StatisticElement(models.Model):
+    """
+        Encja archiwum raportów
+        Przechowuje metadane (pokój, metryka, typ raportu, zakres czasu) oraz sam plik wynikowy
+    """
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
 
     periodStart = models.DateTimeField()

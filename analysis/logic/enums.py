@@ -2,6 +2,8 @@ from django.db import models
 
 
 class ReportType(models.TextChoices):
+    # Typ okresu raportu na podstawie długości wybranego przedziału czasu.
+
     DAILY = "DAILY"
     WEEKLY = "WEEKLY"
     MONTHLY = "MONTHLY"
@@ -11,6 +13,7 @@ class ReportType(models.TextChoices):
 
 
 class MeasurementUnit(models.TextChoices):
+    # Jednostka pomiaru dla metryki
     CELSIUS = "celsius"
     LUX = "lux"
     LUMEN = "lumen"
@@ -24,6 +27,7 @@ class MeasurementUnit(models.TextChoices):
 
 
 class Measurement(models.TextChoices):
+    # Lista obsługiwanych metryk
     TEMPERATURE = "temperature"
     HUMIDITY = "humidity"
     ENERGY = "energy"

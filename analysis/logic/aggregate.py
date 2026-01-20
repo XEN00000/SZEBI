@@ -9,6 +9,10 @@ from .enums import Measurement, MeasurementUnit, ReportType
 
 @dataclass
 class Aggregate:
+    """
+       Klasa pomocnicza przechowująca zagregowane dane pomiarowe dla jednego pokoju i jednej metryki w zadanym przedziale czasu.
+       Jest wykorzystywana do obliczeń statystycznych oraz do generowania wykresów i raportów.
+    """
     roomId: str
     metric: Measurement
     unit: MeasurementUnit

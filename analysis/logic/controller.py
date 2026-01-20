@@ -9,11 +9,18 @@ from analysis.models import StatisticElement, FileType
 
 
 class Controller:
+    """
+    Łączy logikę obliczeń (Statistics/Reporting) z dostępem do danych i archiwum (DataManager).
+    """
     def __init__(self, reporting: Reporting, dataManager: DataManager):
         self.reporting = reporting
         self.dataManager = dataManager
 
     def createPlot(self, roomId: str, periodStart: datetime, periodEnd: datetime, metric: List[Measurement]) -> bytes:
+        """
+        Tworzy wykres PNG dla podanego pokoju, zakresu czasu i metryki.
+        Najpierw liczy statystyki, potem generuje obraz PNG.
+        """
         df = self.reporting.statistics.calculateStatistics(roomId, periodStart, periodEnd, metric)
         return self.reporting.createPng(df)
 
@@ -25,7 +32,7 @@ class Controller:
         metric: List[Measurement],
         createdBy=None,
     ) -> bytes:
-        # Zakładamy (jak w Twoim froncie): jedna metryka
+        #Tworzy raport PDF i zapisuje go w archiwum (tabela StatisticElement)
         if len(metric) != 1:
             raise ValueError("createReport: na razie obsługuję zapis archiwum tylko dla jednej metryki.")
 
@@ -33,15 +40,15 @@ class Controller:
         pdf_bytes = self.reporting.createPdf(df)
 
         report_type = ReportType(df.iloc[0]["period"]) if not df.empty else ReportType.DAILY
-        metric_value = metric[0].value  # jedna metryka
+        metric_value = metric[0].value
 
         report = StatisticElement(
             periodStart=periodStart,
             periodEnd=periodEnd,
             createdBy=createdBy,
-            reportType=report_type.value,   # <-- string do DB
+            reportType=report_type.value,
             roomId=roomId,
-            metric=metric_value,            # <-- string do DB
+            metric=metric_value,
             fileType=FileType.PDF,
             fileContent=pdf_bytes,
         )
@@ -57,6 +64,7 @@ class Controller:
         metric: List[Measurement],
         reportType: ReportType,
     ):
+        #Zwraca listę zapisanych raportów archiwum
         return self.dataManager.getArchivedReportsList(
             reportType=reportType,
             from_dt=periodStart,
@@ -66,5 +74,6 @@ class Controller:
         )
 
     def getArchivedReport(self, report_id: UUID) -> bytes:
+        #Pobiera pojedynczy zapisany plik z archiwum po id
         report = self.dataManager.getArchivedReport(report_id)
         return bytes(report.fileContent)

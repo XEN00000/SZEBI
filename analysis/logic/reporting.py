@@ -11,7 +11,9 @@ from .statistics import Statistics
 
 
 class Reporting:
-
+    """
+       Odpowiada za tworzenie plików wynikowych (PDF/PNG) na podstawie statystyk.
+    """
     def __init__(self, statistics: Statistics):
         self.statistics = statistics
 
@@ -22,6 +24,7 @@ class Reporting:
         periodEnd: datetime,
         metric: List[Measurement],
     ) -> bytes:
+        #Generuje raport na żądanie użytkownika
         df = self.statistics.calculateStatistics(roomId, periodStart, periodEnd, metric)
         return self.createPdf(df)
 
@@ -42,10 +45,12 @@ class Reporting:
         periodEnd: datetime,
         metric: List[Measurement],
     ) -> str:
+        # Buduje nazwę pliku raportu na podstawie pokoju, metryki i zakresu dat.
         metric_name = metric[0].value if metric else "metric"
         return f"report_{roomId}_{metric_name}_{periodStart.date()}_{periodEnd.date()}"
 
     def createPdf(self, statistics: pd.DataFrame) -> bytes:
+        # Tworzy plik PDF z DataFrame ze statystykami.
         buffer = io.BytesIO()
         pdf = canvas.Canvas(buffer, pagesize=(595, 842))
         y = 800
@@ -108,6 +113,7 @@ class Reporting:
         return buffer.read()
 
     def createPng(self, statistics: pd.DataFrame) -> bytes:
+        # Tworzy wykres PNG z DataFrame ze statystykami.
         if statistics.empty:
             return b""
 

@@ -11,6 +11,12 @@ from analysis.models import StatisticElement
 
 
 class DataManager:
+    """
+       Warstwa dostępu do danych:
+       - pobieranie pomiarów z bazy (model AcqMeasurement z modułu acquisition),
+       - przygotowanie danych wejściowych do obliczeń (lista obiektów Aggregate),
+       - zapis i odczyt archiwalnych raportów
+    """
     def aggregateRoomData(
         self,
         roomId: str,
@@ -18,6 +24,10 @@ class DataManager:
         periodEnd: datetime,
         metric: List[Measurement],
     ) -> List[Aggregate]:
+        """
+        Zbiera dane z bazy dla wskazanego pokoju i przedziału czasu.
+        Dla każdej metryki tworzy obiekt Aggregate z DataFrame pomiarów oraz wykrytym okresem (DAILY/WEEKLY/...).
+        """
         period = self._detectPeriod(periodStart, periodEnd)
 
         result: List[Aggregate] = []
@@ -47,8 +57,9 @@ class DataManager:
         roomId: Optional[str] = None,
         metric: Optional[List[Measurement]] = None,
     ) -> List[StatisticElement]:
+        #Pobiera listę archiwalnych plików z tabeli StatisticElement.
         qs = StatisticElement.objects.filter(
-            reportType=reportType.value,  # zapisujemy string w DB
+            reportType=reportType.value,
             periodStart__gte=from_dt,
             periodEnd__lte=to_dt,
         ).order_by("-createdAt")
@@ -62,10 +73,12 @@ class DataManager:
         return list(qs)
 
     def saveArchivedReport(self, report: StatisticElement) -> StatisticElement:
+        # Zapisuje gotowy raport do archiwum i zwraca zapisany obiekt.
         report.save()
         return report
 
     def getArchivedReport(self, report_id: UUID) -> StatisticElement:
+        # Pobiera jeden element archiwum po ID.
         return StatisticElement.objects.get(id=report_id)
 
     def _loadMeasurements(
@@ -75,6 +88,12 @@ class DataManager:
         periodEnd: datetime,
         metric: Measurement,
     ) -> tuple[pd.DataFrame, MeasurementUnit]:
+        """
+            pobiera surowe pomiary z tabeli acquisition_measurement (AcqMeasurement).
+            Zwraca:
+            - DataFrame z kolumnami: timestamp, value
+            - jednostkę (MeasurementUnit) odczytaną z konfiguracji sensora
+        """
         qs = (
             AcqMeasurement.objects.filter(
                 sensor__location__room=roomId,

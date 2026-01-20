@@ -7,6 +7,10 @@ from .enums import Measurement
 
 
 class Statistics:
+    """
+    Liczy statystyki (mean/min/max) na podstawie surowych danych z DataManager.
+    Wynik zwraca jako DataFrame, który potem wykorzystuje Reporting.
+    """
     def __init__(self, dataManager: DataManager):
         self.dataManager = dataManager
 
@@ -17,6 +21,13 @@ class Statistics:
         periodEnd: datetime,
         metric: List[Measurement],
     ) -> pd.DataFrame:
+        """
+            Dla podanego pokoju, zakresu czasu i listy metryk:
+            1) pobiera dane z DataManager (lista obiektów Aggregate),
+            2) liczy mean/min/max dla każdej metryki,
+            3) składa wynik w jeden DataFrame.
+            Jeśli dla metryki nie ma żadnych danych, wartości mean/min/max są None.
+        """
         aggregates = self.dataManager.aggregateRoomData(roomId, periodStart, periodEnd, metric)
 
         rows = []
