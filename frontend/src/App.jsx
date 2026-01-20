@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
+import AlarmsPage from './pages/AlarmsPage';
 import LoginPage from './pages/LoginPage';
+import AnalysisDashboard from './pages/AnalysisDashboard.jsx';
+import AcquisitionPage from './pages/AcquisitionPage';
+import Forecasting from "./pages/Forecasting.jsx";
+import OptimalizationPage from './pages/OptimalizationPage';
 
-// Definicje ról zgodne z core/models.py
 const ROLES = {
   ADMIN: 'building_admin',
   WORKER: 'worker',
@@ -35,14 +40,14 @@ function App() {
           </Route>
 
           <Route element={<ProtectedRoute user={user} allowedRoles={[ROLES.ADMIN, ROLES.MAINTENANCE]} />}>
-            <Route path="acquisition" element={<div className="p-8 text-center text-gray-400">Moduł Akwizycji Danych</div>} />
-            <Route path="analysis" element={<div className="p-8 text-center text-gray-400">Moduł Analizy i Raportowania</div>} />
-            <Route path="forecasting" element={<div className="p-8 text-center text-gray-400">Moduł Prognozowania</div>} />
-            <Route path="alarms" element={<div className="p-8 text-center text-gray-400">Moduł Alarmów i Utrzymania</div>} />
+            <Route path="acquisition" element={<AcquisitionPage />} />
+            <Route path="analysis" element={<AnalysisDashboard />} />
+            <Route path="forecasting" element={<Forecasting user={user} />} />
+            <Route path="alarms" element={<AlarmsPage />} />
           </Route>
 
           <Route element={<ProtectedRoute user={user} allowedRoles={[ROLES.ADMIN, ROLES.MAINTENANCE, ROLES.WORKER]} />}>
-            <Route path="optimization" element={<div className="p-8 text-center text-gray-400">Moduł Optymalizacji i Sterowania</div>} />
+            <Route path="optimization" element={<OptimalizationPage userRole={user?.role} userId={user?.id} />} />
           </Route>
 
           <Route path="*" element={<div className="p-8 text-center text-gray-400">404 - Strona nie odnaleziona</div>} />

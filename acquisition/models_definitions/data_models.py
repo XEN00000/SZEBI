@@ -31,10 +31,6 @@ class DataLog(models.Model):
 
 class Location(models.Model):
     id = models.AutoField(primary_key=True, db_column="location_id")
-
-    # =======================================
-    # TYMCZASOWO room TO UUID WYSYŁANE PRZEZ SYMULACJE
-    # =======================================
     floor = models.IntegerField(null=True, blank=True)
     room = models.CharField(max_length=100)
     description = models.TextField(blank=True)

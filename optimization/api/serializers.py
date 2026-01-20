@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from simulation.models import Device
-from optimization.models import OptimizationRule, UserPreference
+from optimization.models import OptimizationRule, UserPreference, OptimizationLog
 
 class ExternalAlarmSerializer(serializers.Serializer):
     """
@@ -35,3 +35,12 @@ class UserPreferenceSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserPreference
         fields = ['id', 'device', 'device_name', 'target_value', 'schedule']
+
+class OptimizationLogSerializer(serializers.ModelSerializer):
+    rule_name = serializers.CharField(source='rule.name', read_only=True)
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+    
+    class Meta:
+        model = OptimizationLog
+        fields = ['id', 'status', 'status_display', 'rule_name', 'action', 'affected_devices_count', 
+                  'message', 'details', 'timestamp']
