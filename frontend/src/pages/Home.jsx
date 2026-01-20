@@ -75,9 +75,9 @@ const Home = () => {
                 />
                 <FeatureCard
                     icon={Activity}
-                    title="Deep Analysis"
-                    description="Comprehensive data analytics and reporting tools to visualize consumption patterns."
-                    link="/analysis"
+                    title="Acquisition"
+                    description="Real-time data acquisition and MQTT monitoring for all building sensors and devices."
+                    link="/acquisition"
                     colorClass="theme-purple"
                 />
             </div>
