@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Plus } from 'lucide-react';
 import NotificationToast from '../components/alarms/NotificationToast';
-import PageHeader from '../components/alarms/PageHeader';
 import ActiveAlertsTable from '../components/alarms/ActiveAlertsTable';
 import ClosedAlertsSection from '../components/alarms/ClosedAlertsSection';
 import RuleList from '../components/alarms/RuleList';
@@ -426,10 +425,10 @@ const AlarmsPage = () => {
                 onClose={() => setNotification(null)}
             />
 
-            <PageHeader
-                title="Alarm System"
-                subtitle="Manage alarm rules and monitor system status"
-            />
+            <div className="header-section">
+                <h1 className="page-title">Alarm System</h1>
+                <p className="page-subtitle">Manage alarm rules and monitor system status</p>
+            </div>
 
             <button 
                 className="btn-add-rule"
