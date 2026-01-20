@@ -1,7 +1,8 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from unittest.mock import patch, MagicMock
-from .models import AlertRule, Alert, RuleOperator, AlertPriority, SZEBiUser, AlertStatus
+from .models import AlertRule, Alert, RuleOperator, AlertPriority, AlertStatus
+from core.models import User
 from .services import MonitoringService, NotificationService, AlertManager
 
 User = get_user_model()
@@ -11,7 +12,7 @@ class AlarmSystemTest(TestCase):
     def setUp(self):
         # Przygotowanie danych testowych
         self.user = User.objects.create_user(username='testuser', password='password')
-        self.szebi_user = SZEBiUser.objects.create(user=self.user, username='testuser', email='test@example.com', role='admin')
+        self.szebi_user = User.objects.create(username='testuser', email='test@example.com')
         
         self.rule = AlertRule.objects.create(
             name="Test Temp High",

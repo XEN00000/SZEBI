@@ -1,3 +1,4 @@
+from optimization.integration.mqtt.device_cache import device_cache
 from optimization.models import OptimizationRule, UserPreference
 from simulation.models import Device
 
@@ -26,4 +27,6 @@ class DeviceRepository:
     Dostęp do urządzeń (z modułu symulacji).
     """
     def get_all_active_devices(self):
-        return Device.objects.filter(is_active=True)
+        # zwracamy liste dictow z cache
+        return device_cache.active()
+    

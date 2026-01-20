@@ -210,3 +210,6 @@ __marimo__/
 # Mosquitto runtime files
 mosquitto/data/*
 mosquitto/log/*
+
+# macos
+.DS_Store

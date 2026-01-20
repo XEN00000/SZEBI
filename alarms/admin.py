@@ -12,19 +12,20 @@ from .models import (
     Alert,
     AlertRule,
     AlertComment,
-    SZEBiUser,
     NotificationLog,
     NotificationGroup,
-    NotificationPreference,
     ChannelType
 )
 
+
 @admin.register(Alert)
 class AlertAdmin(admin.ModelAdmin):
-    list_display = ['id', 'status', 'priority', 'timestamp_generated', 'acknowledged_by']
+    list_display = ['id', 'status', 'priority',
+                    'timestamp_generated', 'acknowledged_by']
     list_filter = ['status', 'priority', 'timestamp_generated']
     search_fields = ['id']
     readonly_fields = ['timestamp_generated']
+
 
 @admin.register(AlertRule)
 class AlertRuleAdmin(admin.ModelAdmin):
@@ -32,17 +33,14 @@ class AlertRuleAdmin(admin.ModelAdmin):
     list_filter = ['priority', 'operator']
     search_fields = ['name', 'target_metric']
 
-@admin.register(SZEBiUser)
-class SZEBiUserAdmin(admin.ModelAdmin):
-    list_display = ['username', 'email', 'role', 'is_active']
-    list_filter = ['is_active', 'role']
-    search_fields = ['username', 'email']
 
 @admin.register(NotificationLog)
 class NotificationLogAdmin(admin.ModelAdmin):
-    list_display = ['recipient', 'alert', 'channel', 'status', 'timestamp_sent']
+    list_display = ['recipient', 'alert',
+                    'channel', 'status', 'timestamp_sent']
     list_filter = ['status', 'channel', 'timestamp_sent']
     readonly_fields = ['timestamp_sent']
+
 
 @admin.register(NotificationGroup)
 class NotificationGroupAdmin(admin.ModelAdmin):

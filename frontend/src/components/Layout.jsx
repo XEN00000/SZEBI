@@ -66,7 +66,7 @@ const Layout = ({ user, onLogout }) => {
                         
                         <div className="hidden md:flex items-center ml-4 gap-2">
                             <div className="px-3 py-1 bg-gray-800 rounded-full text-[10px] text-gray-400">
-                                Użytkownik: <span className="text-emerald-400 ml-1 font-mono">{user?.username} ({user?.role})</span>
+                                <span className="text-emerald-400 ml-1 font-mono">{user?.username} ({user?.role})</span>
                             </div>
                         </div>
 
@@ -101,7 +101,7 @@ const Layout = ({ user, onLogout }) => {
                                 setIsMenuOpen(false);
                                 onLogout();
                             }}
-                            className="flex items-center gap-2 text-red-400 hover:text-red-300 transition-colors mt-2 md:mt-0 md:ml-6"
+                            className="nav-logout-btn"
                         >
                             <LogOut size={16} />
                             <span>Wyloguj się</span>

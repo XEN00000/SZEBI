@@ -18,3 +18,5 @@ matplotlib
 reportlab
 regex
 paho-mqtt==1.6.1
+
+scikit-learn==1.5.2

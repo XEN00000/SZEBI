@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, Lock, LogIn, Rocket, Zap, BarChart, Database, TrendingUp } from 'lucide-react';
 import { getCookie } from '../utils/csrf';
 
@@ -35,6 +35,9 @@ const LoginPage = ({ onLoginSuccess }) => {
 
     return (
         <div className="login-container">
+            <div className="hero-background-effect" aria-hidden="true" style={{ top: '0', zIndex: 0 }}>
+                <div className="gradient-blob" />
+            </div>
             <nav className="navbar">
                 <div className="nav-content">
                     <div className="nav-header">
@@ -80,7 +83,6 @@ const LoginPage = ({ onLoginSuccess }) => {
                         <div className="form-group">
                             <label className="form-label">Nazwa użytkownika</label>
                             <div className="input-wrapper">
-                                <User className="input-icon" size={20} />
                                 <input
                                     type="text"
                                     placeholder="Wprowadź login"
@@ -88,13 +90,13 @@ const LoginPage = ({ onLoginSuccess }) => {
                                     value={credentials.username}
                                     onChange={e => setCredentials({ ...credentials, username: e.target.value })}
                                 />
+                                <User className="input-icon" size={20} />
                             </div>
                         </div>
 
                         <div className="form-group">
                             <label className="form-label">Hasło</label>
                             <div className="input-wrapper">
-                                <Lock className="input-icon" size={20} />
                                 <input
                                     type="password"
                                     placeholder="Wprowadź hasło"
@@ -102,6 +104,7 @@ const LoginPage = ({ onLoginSuccess }) => {
                                     value={credentials.password}
                                     onChange={e => setCredentials({ ...credentials, password: e.target.value })}
                                 />
+                                <Lock className="input-icon" size={20} />
                             </div>
                         </div>
 

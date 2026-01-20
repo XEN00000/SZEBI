@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
+import AlarmsPage from './pages/AlarmsPage';
 import LoginPage from './pages/LoginPage';
+import AnalysisDashboard from './pages/AnalysisDashboard.jsx';
 import AcquisitionPage from './pages/AcquisitionPage';
 import Forecasting from "./pages/Forecasting.jsx";
+import OptimalizationPage from './pages/OptimalizationPage';
 
 const ROLES = {
   ADMIN: 'building_admin',
@@ -39,11 +43,11 @@ function App() {
             <Route path="acquisition" element={<AcquisitionPage />} />
             <Route path="analysis" element={<AnalysisDashboard />} />
             <Route path="forecasting" element={<Forecasting/>} />
-            <Route path="alarms" element={<div className="p-8 text-center text-gray-400">Moduł Alarmów i Utrzymania</div>} />
+            <Route path="alarms" element={<AlarmsPage />} />
           </Route>
 
           <Route element={<ProtectedRoute user={user} allowedRoles={[ROLES.ADMIN, ROLES.MAINTENANCE, ROLES.WORKER]} />}>
-            <Route path="optimization" element={<div className="p-8 text-center text-gray-400">Moduł Optymalizacji i Sterowania</div>} />
+            <Route path="optimization" element={<OptimalizationPage userRole={user?.role} userId={user?.id} />} />
           </Route>
 
           <Route path="*" element={<div className="p-8 text-center text-gray-400">404 - Strona nie odnaleziona</div>} />
