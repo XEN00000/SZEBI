@@ -5,6 +5,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
 import LoginPage from './pages/LoginPage';
 import AcquisitionPage from './pages/AcquisitionPage';
+import Forecasting from "./pages/Forecasting.jsx";
 
 const ROLES = {
   ADMIN: 'building_admin',
@@ -36,7 +37,7 @@ function App() {
 
           <Route element={<ProtectedRoute user={user} allowedRoles={[ROLES.ADMIN, ROLES.MAINTENANCE]} />}>
             <Route path="acquisition" element={<AcquisitionPage />} />
-            <Route path="analysis" element={<div className="p-8 text-center text-gray-400">Moduł Analizy i Raportowania</div>} />
+            <Route path="analysis" element={<Forecasting/>} />
             <Route path="forecasting" element={<div className="p-8 text-center text-gray-400">Moduł Prognozowania</div>} />
             <Route path="alarms" element={<div className="p-8 text-center text-gray-400">Moduł Alarmów i Utrzymania</div>} />
           </Route>
