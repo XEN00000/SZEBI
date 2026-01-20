@@ -51,6 +51,7 @@ class AlarmWebhookView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class DeviceListView(APIView):
+    permission_classes = [AllowAny]  # serwer->serwer, bez logowania/CSRF
     def get(self, request):
         repo = DeviceRepository()
         devices = repo.get_all_active_devices()
