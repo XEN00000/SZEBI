@@ -888,7 +888,7 @@ a {
 .form-select {
   width: 100%;
   padding: 0.75rem;
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(30, 41, 59, 0.9);
   border: 1px solid var(--border-color);
   border-radius: 0.5rem;
   color: var(--text-primary);
@@ -921,19 +921,28 @@ a {
 }
 
 .form-select option {
-  background-color: #1e293b;
+  background-color: #0f172a;
   color: #e2e8f0;
-  padding: 0.5rem;
+  padding: 0.75rem;
+  border: none;
+  margin: 0;
+  line-height: 1.5;
 }
 
 .form-select option:hover {
-  background-color: #334155;
-  color: #f1f5f9;
+  background-color: #06b6d4;
+  color: #ffffff;
+}
+
+.form-select option:focus {
+  background-color: #06b6d4;
+  color: #ffffff;
 }
 
 .form-select option:checked {
   background-color: var(--primary-color);
   color: white;
+  font-weight: 600;
 }
 
 .form-hint {
@@ -1140,7 +1149,7 @@ a {
   justify-content: center;
   padding: 0.35rem 0.6rem;
   border-radius: 0.5rem;
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(239, 68, 68, 0.05);
   border: 1px solid rgba(239, 68, 68, 0.2);
   color: #fca5a5;
   cursor: pointer;
@@ -1148,7 +1157,7 @@ a {
 }
 
 .btn-ghost-danger:hover:not(:disabled) {
-  background: rgba(239, 68, 68, 0.15);
+  background: rgba(239, 68, 68, 0.1);
   border-color: rgba(239, 68, 68, 0.4);
   color: #fecaca;
 }
@@ -1164,7 +1173,7 @@ a {
   justify-content: center;
   padding: 0.35rem 0.6rem;
   border-radius: 0.5rem;
-  background: rgba(59, 130, 246, 0.1); /* blue-500 */
+  background: rgba(59, 130, 246, 0.05); /* blue-500 */
   border: 1px solid rgba(59, 130, 246, 0.25);
   color: #93c5fd; /* blue-300 */
   cursor: pointer;
@@ -1172,7 +1181,7 @@ a {
 }
 
 .btn-ghost-edit:hover:not(:disabled) {
-  background: rgba(59, 130, 246, 0.18);
+  background: rgba(59, 130, 246, 0.1);
   border-color: rgba(59, 130, 246, 0.45);
   color: #bfdbfe; /* blue-200 */
 }

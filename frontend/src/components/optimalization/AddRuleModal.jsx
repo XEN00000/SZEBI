@@ -3,7 +3,7 @@ import { X, Plus, Trash2 } from 'lucide-react';
 
 const API_BASE_URL = 'http://localhost:8000';
 
-const AddRuleModal = ({ isOpen, onClose, onSubmit, loading }) => {
+const AddRuleModal = ({ isOpen, onClose, onSubmit, loading, editingRule = null }) => {
     const [formData, setFormData] = useState({
         name: '',
         conditions: [],
@@ -22,8 +22,25 @@ const AddRuleModal = ({ isOpen, onClose, onSubmit, loading }) => {
     useEffect(() => {
         if (isOpen) {
             fetchOptions();
+            if (editingRule) {
+                setFormData({
+                    name: editingRule.name,
+                    conditions: editingRule.conditions || [],
+                    action: editingRule.action,
+                    priority: editingRule.priority,
+                    is_active: editingRule.is_active
+                });
+            } else {
+                setFormData({
+                    name: '',
+                    conditions: [],
+                    action: '',
+                    priority: 1,
+                    is_active: true
+                });
+            }
         }
-    }, [isOpen]);
+    }, [isOpen, editingRule]);
 
     const fetchOptions = async () => {
         try {
@@ -54,7 +71,7 @@ const AddRuleModal = ({ isOpen, onClose, onSubmit, loading }) => {
         const { name, value } = e.target;
         setNewCondition(prev => ({
             ...prev,
-            [name]: name === 'value' ? (isNaN(value) ? value : parseFloat(value)) : value
+            [name]: name === 'value' ? (value === '' ? '' : isNaN(value) ? value : parseFloat(value)) : value
         }));
     };
 
@@ -100,7 +117,7 @@ const AddRuleModal = ({ isOpen, onClose, onSubmit, loading }) => {
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal-container" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
-                    <h2 className="modal-title">Dodaj nową regułę</h2>
+                    <h2 className="modal-title">{editingRule ? 'Edytuj regułę' : 'Dodaj nową regułę'}</h2>
                     <button onClick={onClose} className="modal-close">
                         <X size={20} />
                     </button>
@@ -151,7 +168,7 @@ const AddRuleModal = ({ isOpen, onClose, onSubmit, loading }) => {
                                         name="field"
                                         value={newCondition.field}
                                         onChange={handleConditionChange}
-                                        className="form-input form-input-sm"
+                                        className="form-select form-input-sm"
                                     >
                                         <option value="">Wybierz pole...</option>
                                         {availableConditions.map(cond => (
@@ -164,7 +181,7 @@ const AddRuleModal = ({ isOpen, onClose, onSubmit, loading }) => {
                                         name="operator"
                                         value={newCondition.operator}
                                         onChange={handleConditionChange}
-                                        className="form-input form-input-sm"
+                                        className="form-select form-input-sm"
                                     >
                                         <option value=">">&gt;</option>
                                         <option value="<">&lt;</option>
@@ -201,7 +218,7 @@ const AddRuleModal = ({ isOpen, onClose, onSubmit, loading }) => {
                                 name="action"
                                 value={formData.action}
                                 onChange={handleChange}
-                                className="form-input"
+                                className="form-select"
                                 required
                             >
                                 <option value="">Wybierz akcję...</option>
@@ -246,7 +263,7 @@ const AddRuleModal = ({ isOpen, onClose, onSubmit, loading }) => {
                             Anuluj
                         </button>
                         <button type="submit" className="btn-primary" disabled={loading}>
-                            {loading ? 'Dodawanie...' : 'Dodaj regułę'}
+                            {loading ? (editingRule ? 'Aktualizowanie...' : 'Dodawanie...') : (editingRule ? 'Zaktualizuj regułę' : 'Dodaj regułę')}
                         </button>
                     </div>
                 </form>

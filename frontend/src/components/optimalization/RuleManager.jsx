@@ -1,19 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Trash2, Edit2, Plus, Lock } from 'lucide-react';
 import { getCookie } from '../../utils/csrf';
 
 const API_BASE_URL = 'http://localhost:8000';
 
-const RuleManager = ({ onAddClick, onRefresh, notification, setNotification, userRole }) => {
+const RuleManager = ({ onAddClick, onRefresh, notification, setNotification, userRole, refreshKey, onEditClick }) => {
     const [rules, setRules] = useState([]);
     const [loading, setLoading] = useState(false);
     const [deletingId, setDeletingId] = useState(null);
 
-    useEffect(() => {
-        fetchRules();
-    }, []);
-
-    const fetchRules = async () => {
+    const fetchRules = useCallback(async () => {
         setLoading(true);
         try {
             const response = await fetch(`${API_BASE_URL}/api/optimization/rules/`, {
@@ -33,7 +29,11 @@ const RuleManager = ({ onAddClick, onRefresh, notification, setNotification, use
             setLoading(false);
             setTimeout(() => setNotification(null), 4000);
         }
-    };
+    }, [setNotification]);
+
+    useEffect(() => {
+        fetchRules();
+    }, [refreshKey, fetchRules]);
 
     const handleDelete = async (ruleId) => {
         const confirmed = window.confirm('Czy na pewno chcesz usunąć tę regułę?');
@@ -154,18 +154,28 @@ const RuleManager = ({ onAddClick, onRefresh, notification, setNotification, use
                                         <span className="priority-badge">{rule.priority}</span>
                                     </td>
                                     <td>
-                                        <button
-                                            onClick={() => toggleActive(rule)}
-                                            className={`status-toggle ${rule.is_active ? 'active' : 'inactive'}`}
-                                        >
-                                            {rule.is_active ? 'Aktywna' : 'Nieaktywna'}
-                                        </button>
+                                        {isAdmin ? (
+                                            <button
+                                                onClick={() => toggleActive(rule)}
+                                                className={`status-toggle ${rule.is_active ? 'active' : 'inactive'}`}
+                                            >
+                                                {rule.is_active ? 'Aktywna' : 'Nieaktywna'}
+                                            </button>
+                                        ) : (
+                                            <span className={`status-label ${rule.is_active ? 'active' : 'inactive'}`}>
+                                                {rule.is_active ? 'Aktywna' : 'Nieaktywna'}
+                                            </span>
+                                        )}
                                     </td>
                                     <td>
                                         <div className="table-actions">
                                             {isAdmin && (
                                                 <>
-                                                    <button className="btn-ghost-edit" title="Edytuj">
+                                                    <button 
+                                                        onClick={() => onEditClick(rule)}
+                                                        className="btn-ghost-edit" 
+                                                        title="Edytuj"
+                                                    >
                                                         <Edit2 size={16} />
                                                     </button>
                                                     <button

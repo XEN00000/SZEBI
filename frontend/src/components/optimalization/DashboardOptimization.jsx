@@ -7,7 +7,7 @@ const DashboardOptimization = ({ refreshKey }) => {
     const [devices, setDevices] = useState([]);
     const [stats, setStats] = useState({
         total_devices: 0,
-        active_rules: 0,
+        active_preferences: 0,
         recent_optimizations: 0
     });
     const [loading, setLoading] = useState(true);
@@ -15,17 +15,19 @@ const DashboardOptimization = ({ refreshKey }) => {
 
     useEffect(() => {
         fetchDashboardData();
+        const interval = setInterval(fetchDashboardData, 5000); // odświeża co 5 sekund
+        return () => clearInterval(interval);
     }, [refreshKey]);
 
     const fetchDashboardData = async () => {
         setLoading(true);
         try {
-            const [devicesRes, rulesRes, logsRes] = await Promise.all([
+            const [devicesRes, prefsRes, logsRes] = await Promise.all([
                 fetch(`${API_BASE_URL}/api/optimization/devices/`, {
                     credentials: 'include',
                     headers: { 'Content-Type': 'application/json' }
                 }),
-                fetch(`${API_BASE_URL}/api/optimization/rules/`, {
+                fetch(`${API_BASE_URL}/api/optimization/preferences/`, {
                     credentials: 'include',
                     headers: { 'Content-Type': 'application/json' }
                 }),
@@ -42,11 +44,11 @@ const DashboardOptimization = ({ refreshKey }) => {
                 setDevices(devicesList);
             }
 
-            let activeRules = 0;
-            if (rulesRes.ok) {
-                const rulesData = await rulesRes.json();
-                const rulesList = Array.isArray(rulesData) ? rulesData : rulesData.results || [];
-                activeRules = rulesList.filter(r => r.is_active).length;
+            let activePreferences = 0;
+            if (prefsRes.ok) {
+                const prefsData = await prefsRes.json();
+                const prefsList = Array.isArray(prefsData) ? prefsData : prefsData.results || [];
+                activePreferences = prefsList.filter(p => p.is_active).length;
             }
 
             let recentOptimizations = 0;
@@ -58,7 +60,7 @@ const DashboardOptimization = ({ refreshKey }) => {
             
             setStats({
                 total_devices: devicesList.length,
-                active_rules: activeRules,
+                active_preferences: activePreferences,
                 recent_optimizations: recentOptimizations
             });
             setError(null);
@@ -109,8 +111,8 @@ const DashboardOptimization = ({ refreshKey }) => {
                         <Activity size={24} />
                     </div>
                     <div className="stat-content">
-                        <p className="stat-label">Aktywne reguły</p>
-                        <p className="stat-value">{stats.active_rules}</p>
+                        <p className="stat-label">Aktywne preferencje</p>
+                        <p className="stat-value">{stats.active_preferences}</p>
                     </div>
                 </div>
 

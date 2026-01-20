@@ -4,7 +4,7 @@ import { getCookie } from '../../utils/csrf';
 
 const API_BASE_URL = 'http://localhost:8000';
 
-const PreferenceManager = ({ notification, setNotification, userRole, userId }) => {
+const PreferenceManager = ({ notification, setNotification, userRole, userId, refreshKey, onPreferenceChange }) => {
     const [preferences, setPreferences] = useState([]);
     const [devices, setDevices] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -22,7 +22,7 @@ const PreferenceManager = ({ notification, setNotification, userRole, userId }) 
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [refreshKey]);
 
     const fetchData = async () => {
         setLoading(true);
@@ -89,8 +89,9 @@ const PreferenceManager = ({ notification, setNotification, userRole, userId }) 
 
             setNotification({ type: 'success', message: 'Preferencja dodana.' });
             setShowAddModal(false);
-            setFormData({ device_id: '', target_value: '', schedule: JSON.stringify({}) });
+            setFormData({ device: '', target_value: '', schedule: JSON.stringify({}) });
             fetchData();
+            if (onPreferenceChange) onPreferenceChange();
         } catch (error) {
             console.error('Error adding preference:', error);
             setNotification({ type: 'error', message: 'Nie udało się dodać preferencji.' });
@@ -118,6 +119,7 @@ const PreferenceManager = ({ notification, setNotification, userRole, userId }) 
 
             setNotification({ type: 'success', message: 'Preferencja usunięta.' });
             fetchData();
+            if (onPreferenceChange) onPreferenceChange();
         } catch (error) {
             console.error('Error deleting preference:', error);
             setNotification({ type: 'error', message: 'Nie udało się usunąć preferencji.' });
@@ -177,8 +179,8 @@ const PreferenceManager = ({ notification, setNotification, userRole, userId }) 
                                         Urządzenie <span className="required">*</span>
                                     </label>
                                     <select
-                                        value={formData.device_id}
-                                        onChange={(e) => setFormData({ ...formData, device_id: e.target.value })}
+                                        value={formData.device}
+                                        onChange={(e) => setFormData({ ...formData, device: e.target.value })}
                                         className="form-select"
                                         required
                                     >
@@ -223,10 +225,10 @@ const PreferenceManager = ({ notification, setNotification, userRole, userId }) 
                 <h4>{isAdmin ? 'Wszystkie preferencje' : 'Moje preferencje'} ({displayPreferences.length})</h4>
                 {loading ? (
                     <div className="loading-message">Ładowanie preferencji...</div>
-                ) : preferences.length === 0 ? (
+                ) : displayPreferences.length === 0 ? (
                     <div className="empty-message">Brak preferencji. Dodaj nową aby zacząć.</div>
                 ) : (
-                    preferences.map(pref => (
+                    displayPreferences.map(pref => (
                         <div key={pref.id} className="preference-card">
                             <div className="pref-header">
                                 <h4>{pref.device_name}</h4>

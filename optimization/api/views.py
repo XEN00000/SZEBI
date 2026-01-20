@@ -68,8 +68,8 @@ class DeviceListView(APIView):
     def get(self, request):
         repo = DeviceRepository()
         devices = repo.get_all_active_devices()
-        serializer = DeviceSerializer(devices, many=True)
-        return Response(serializer.data)
+        # devices to lista dictów z MQTT cache, zwracamy je bezpośrednio
+        return Response(devices)
 
 class AvailableConditionsView(APIView):
     """Endpoint zwracający dostępne warunki do wyboru w regułach"""

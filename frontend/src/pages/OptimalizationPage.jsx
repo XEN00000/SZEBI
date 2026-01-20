@@ -12,6 +12,7 @@ const API_BASE_URL = 'http://localhost:8000';
 
 const OptimalizationPage = ({ userRole, userId }) => {
     const [showAddRuleModal, setShowAddRuleModal] = useState(false);
+    const [editingRule, setEditingRule] = useState(null);
     const [notification, setNotification] = useState(null);
     const [addingRule, setAddingRule] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
@@ -20,8 +21,11 @@ const OptimalizationPage = ({ userRole, userId }) => {
         setAddingRule(true);
         try {
             const csrftoken = getCookie('csrftoken');
-            const response = await fetch(`${API_BASE_URL}/api/optimization/rules/`, {
-                method: 'POST',
+            const method = editingRule ? 'PATCH' : 'POST';
+            const url = editingRule ? `${API_BASE_URL}/api/optimization/rules/${editingRule.id}/` : `${API_BASE_URL}/api/optimization/rules/`;
+            
+            const response = await fetch(url, {
+                method: method,
                 credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
@@ -30,21 +34,33 @@ const OptimalizationPage = ({ userRole, userId }) => {
                 body: JSON.stringify(formData)
             });
 
-            if (!response.ok) throw new Error('Failed to add rule');
+            if (!response.ok) throw new Error('Failed to save rule');
 
-            setNotification({ type: 'success', message: 'Reguła dodana pomyślnie.' });
+            const message = editingRule ? 'Reguła zaktualizowana pomyślnie.' : 'Reguła dodana pomyślnie.';
+            setNotification({ type: 'success', message });
             setShowAddRuleModal(false);
+            setEditingRule(null);
             setRefreshKey(prev => prev + 1);
         } catch (error) {
-            console.error('Error adding rule:', error);
-            setNotification({ type: 'error', message: 'Nie udało się dodać reguły.' });
+            console.error('Error saving rule:', error);
+            const message = editingRule ? 'Nie udało się zaktualizować reguły.' : 'Nie udało się dodać reguły.';
+            setNotification({ type: 'error', message });
         } finally {
             setAddingRule(false);
             setTimeout(() => setNotification(null), 4000);
         }
     };
 
+    const handleEditClick = (rule) => {
+        setEditingRule(rule);
+        setShowAddRuleModal(true);
+    };
+
     const handleRefresh = useCallback(() => {
+        setRefreshKey(prev => prev + 1);
+    }, []);
+
+    const handlePreferenceChange = useCallback(() => {
         setRefreshKey(prev => prev + 1);
     }, []);
 
@@ -79,10 +95,12 @@ const OptimalizationPage = ({ userRole, userId }) => {
                 <section className="manager-section">
                     <RuleManager
                         onAddClick={() => setShowAddRuleModal(true)}
+                        onEditClick={handleEditClick}
                         onRefresh={handleRefresh}
                         notification={notification}
                         setNotification={setNotification}
                         userRole={userRole}
+                        refreshKey={refreshKey}
                     />
                 </section>
 
@@ -93,6 +111,8 @@ const OptimalizationPage = ({ userRole, userId }) => {
                         setNotification={setNotification}
                         userRole={userRole}
                         userId={userId}
+                        refreshKey={refreshKey}
+                        onPreferenceChange={handlePreferenceChange}
                     />
                 </section>
 
@@ -109,9 +129,13 @@ const OptimalizationPage = ({ userRole, userId }) => {
                 {/* Add Rule Modal */}
                 <AddRuleModal
                     isOpen={showAddRuleModal}
-                    onClose={() => setShowAddRuleModal(false)}
+                    onClose={() => {
+                        setShowAddRuleModal(false);
+                        setEditingRule(null);
+                    }}
                     onSubmit={handleAddRule}
                     loading={addingRule}
+                    editingRule={editingRule}
                 />
             </div>
         </div>
