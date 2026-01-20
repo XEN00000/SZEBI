@@ -47,9 +47,17 @@ services:
       DEBUG: ${DEBUG:-1}
       DJANGO_PRODUCTION: ${DJANGO_PRODUCTION:-0}
       MQTT_BROKER_HOST: mqtt
+      # Email via MailHog (dev)
+      EMAIL_BACKEND: ${EMAIL_BACKEND:-django.core.mail.backends.smtp.EmailBackend}
+      EMAIL_HOST: ${EMAIL_HOST:-mailhog}
+      EMAIL_PORT: ${EMAIL_PORT:-1025}
+      EMAIL_USE_TLS: ${EMAIL_USE_TLS:-0}
+      EMAIL_USE_SSL: ${EMAIL_USE_SSL:-0}
+      DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-notifications@local.test}
     depends_on:
       - db
       - mqtt
+      - mailhog
 
   frontend:
     build:
@@ -63,6 +71,13 @@ services:
       - VITE_API_URL=http://localhost:8000
     depends_on:
       - web
+
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    restart: unless-stopped
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # Web UI
 
 volumes:
   postgres_data:

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, Lock, LogIn, Rocket, Zap, BarChart, Database, TrendingUp } from 'lucide-react';
 import { getCookie } from '../utils/csrf';
 

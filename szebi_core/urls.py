@@ -20,7 +20,7 @@ from core.views import LoginView, LogoutView
 
 # ---- alarms router + mock endpoint (from alarms branch) ----
 from rest_framework import routers
-from alarms.views import AlertViewSet, AlertRuleViewSet
+from alarms.views import AlertViewSet, AlertRuleViewSet, DataInspectionViewSet
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
@@ -28,6 +28,9 @@ import json
 router = routers.DefaultRouter()
 router.register(r'alerts', AlertViewSet, basename='alert')
 router.register(r'alert-rules', AlertRuleViewSet, basename='alert-rule')
+router.register(r'data-inspection', DataInspectionViewSet,
+                basename='data-inspection')
+
 
 @csrf_exempt
 def emergency_mode(request):
@@ -48,6 +51,7 @@ def emergency_mode(request):
     except Exception as e:
         print(f"ERROR parsing alert: {e}")
         return JsonResponse({'error': str(e)}, status=400)
+
 
 # ---- urlpatterns merged from alarms + optimization + analysis ----
 urlpatterns = [
