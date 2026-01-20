@@ -1,4 +1,7 @@
-import random
+from typing import Dict, Any
+from django.utils import timezone
+
+from optimization.integration.mqtt_client import MqttClient
 
 class ForecastClient:
     """
@@ -16,11 +19,20 @@ class ForecastClient:
 
 class SimulationClient:
     """
-    Klient do komunikacji z Modułem Symulacji.
+    Adapter do modułu symulacji – wysyłamy komendy przez MQTT.
     Realizuje interfejs IDeviceControl[cite: 265].
     """
-    def publish_command(self, device_id, command_map):
-        # MOCK: Symulujemy wysłanie rozkazu do urządzenia
-        print(f"\n[INTEGRATION] --> WYSYŁAM DO SYMULACJI (ID={device_id}): {command_map}")
-        # Zwracamy True jako potwierdzenie (ACK)
-        return True
+    def __init__(self):
+        self.mqtt = MqttClient(client_id="optimization-simulation-client")
+
+    def publish_command(self, device_id: int, settings: Dict[str, Any]) -> bool:
+        topic = f"simulation/commands/{device_id}"
+
+        payload = {
+            "device_id": device_id,
+            "command": settings,
+            "source": "optimization",
+            "timestamp": timezone.now().isoformat(),
+        }
+
+        return self.mqtt.publish_json(topic, payload, qos=1, retain=False)

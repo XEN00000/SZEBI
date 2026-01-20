@@ -1,64 +1,122 @@
-from optimization.integration.repositories import DeviceRepository, RuleRepository, UserPreferenceRepository
+from optimization.integration.repositories import (
+    DeviceRepository,
+    RuleRepository,
+    UserPreferenceRepository
+)
 from optimization.integration.clients import SimulationClient
 from optimization.logic.algorithm import calculate_optimal_settings
 from optimization.integration.forecasting_repository import ForecastingRepository
 
+
 class OptimizationController:
     """
-    Główny kontroler logiki biznesowej
+    Główny kontroler logiki biznesowej.
     Zarządza przepływem danych między repozytoriami, algorytmem a światem zewnętrznym.
     """
+
     def __init__(self):
-        # Wstrzykiwanie zależności (Repositories & Clients)
         self.device_repo = DeviceRepository()
         self.rule_repo = RuleRepository()
         self.pref_repo = UserPreferenceRepository()
-        
         self.simulation_client = SimulationClient()
 
-    def receive_alarm(self, alarm_data):
+    # ---------------------------
+    # ADAPTER: komenda do symulacji
+    # ---------------------------
+    def _build_simulation_command(self, base: dict, *, reason: str | None = None) -> dict:
         """
-        Obsługa payloadu z modułu Alarmów (ExternalAlarmSerializer).
-        Metoda działa jako ADAPTER - tłumaczy format zewnętrzny na wewnętrzne akcje.
+        Ujednolica payload przekazywany do SimulationClient.publish_command().
+
+        publish_command() powinien dostać prosty dict z komendą, np:
+          {"status": "OFF", "power_limit": 0, "reason": "..."}
+
+        Ta metoda pilnuje:
+        - domyślnych pól
+        - typów
+        - nie wysyłamy "dziwnych" kluczy, których symulacja może nie znać
+        """
+        base = dict(base or {})
+
+        # Minimalny, bezpieczny zestaw pól
+        cmd = {
+            "status": str(base.get("status", "ON")).upper(),
+            "power_limit": int(base.get("power_limit", 100)),
+        }
+
+        # target_value jest opcjonalne (np. HVAC)
+        if "target_value" in base and base["target_value"] is not None:
+            try:
+                cmd["target_value"] = float(base["target_value"])
+            except (TypeError, ValueError):
+                pass
+
+        # reason – pole diagnostyczne (bezpieczne, bo string)
+        if reason:
+            cmd["reason"] = reason
+        elif "reason" in base and base["reason"] is not None:
+            cmd["reason"] = str(base["reason"])
+
+        # Wymuś zakres mocy 0..100
+        if cmd["power_limit"] < 0:
+            cmd["power_limit"] = 0
+        if cmd["power_limit"] > 100:
+            cmd["power_limit"] = 100
+
+        return cmd
+
+    def _send_to_simulation(self, device_id: int, command: dict) -> bool:
+        """
+        Jedno miejsce wysyłki komend do symulacji (MQTT).
+        """
+        ok = self.simulation_client.publish_command(device_id, command)
+        if not ok:
+            print(f"[CONTROLLER][WARN] publish_command() zwróciło False dla device_id={device_id}")
+        return ok
+
+    # ---------------------------
+    # Alarmy
+    # ---------------------------
+    def receive_alarm(self, alarm_data: dict):
+        """
+        Obsługa payloadu z modułu Alarmów.
         """
         print(f"\n[CONTROLLER] !!! OTRZYMANO ALARM ZEWNĘTRZNY !!!")
-        
-        # 1. Pobieramy dane z pól specyficznych dla modułu Alarmów
-        priority = alarm_data.get('priority')          # Np. 'CRITICAL'
-        metric = alarm_data.get('rule_metric')         # Np. 'temp_sensor_1'
-        value = alarm_data.get('triggering_value')     # Np. 99.9
-        
+
+        priority = alarm_data.get("priority")          # 'CRITICAL'
+        metric = alarm_data.get("rule_metric")         # np. 'temp_sensor_1'
+        value = alarm_data.get("triggering_value")     # np. 99.9
+
         print(f"Priorytet: {priority} | Metryka: {metric} | Wartość: {value}")
 
-        if priority == 'CRITICAL':
-            print(f"[CONTROLLER] -> ALARM KRYTYCZNY! Analizuję cel...")
-            
-            # 2. Logika dopasowania urządzenia (Adapter logic)
-            # W idealnym świecie szukalibyśmy urządzenia po 'metric', 
-            # ale tutaj dla demonstracji zakładamy, że dotyczy to urządzenia ID=1.
-            target_device_id = 1 
-            
-            print(f"[CONTROLLER] -> Wysyłam Emergency Shutdown dla ID={target_device_id}")
-            
-            # 3. Wysłanie komendy wyłączenia do Symulacji
-            self.simulation_client.publish_command(target_device_id, {
-                "status": "OFF", 
-                "reason": "EXTERNAL_ALARM_CRITICAL",
-                "details": f"Metric: {metric}, Value: {value}"
-            })
-            
-        else:
-            print("[CONTROLLER] -> Alarm niekrytyczny (INFO/WARNING). Loguję i ignoruję.")
+        if str(priority).upper() == "CRITICAL":
+            print("[CONTROLLER] -> ALARM KRYTYCZNY! Analizuję cel...")
 
+            # TODO: później mapowanie metric -> device_id (np. z repozytorium urządzeń)
+            target_device_id = 1
+
+            print(f"[CONTROLLER] -> Wysyłam Emergency Shutdown dla ID={target_device_id}")
+
+            raw_cmd = {
+                "status": "OFF",
+                "power_limit": 0,
+            }
+            cmd = self._build_simulation_command(
+                raw_cmd,
+                reason=f"EXTERNAL_ALARM_CRITICAL metric={metric} value={value}"
+            )
+            self._send_to_simulation(target_device_id, cmd)
+        else:
+            print("[CONTROLLER] -> Alarm niekrytyczny. Loguję i ignoruję.")
+
+    # ---------------------------
+    # Forecasting
+    # ---------------------------
     def _normalize_forecast(self, latest_forecast):
         """
         Normalizuje wynik ForecastingService.get_latest_forecast() do formatu dla algorytmu.
 
         Forecasting zwraca dict:
-          {
-            "consumption": [float, ...],
-            "production": [float, ...]
-          }
+          {"consumption": [...], "production": [...]}
 
         Tworzymy też:
           - net: consumption - production
@@ -79,11 +137,9 @@ class OptimizationController:
         consumption = _to_float_list(raw.get("consumption"))
         production = _to_float_list(raw.get("production"))
 
-        # jeśli długości różne, przytnij do krótszej
         n = min(len(consumption), len(production))
         consumption = consumption[:n]
         production = production[:n]
-
         net = [c - p for c, p in zip(consumption, production)]
 
         return {
@@ -93,13 +149,13 @@ class OptimizationController:
             "horizon_len": n,
             "_raw": raw,
         }
-    
-   
 
+    # ---------------------------
+    # Cykl optymalizacji
+    # ---------------------------
     def run_optimization_cycle(self):
         """
         Główna pętla sterowania wyzwalana czasowo lub na żądanie.
-        [cite_start]Realizuje Use Case: Wykonanie cyklu optymalizacji[cite: 174].
         """
         print("\n=== [START] CYKL OPTYMALIZACJI ===")
 
@@ -109,12 +165,16 @@ class OptimizationController:
         forecast = self._normalize_forecast(latest_forecast)
 
         if forecast["horizon_len"] == 0:
-            print("[WARN] Brak prognozy (consumption/production) z forecasting. Kończę cykl.")
+            print("[WARN] Brak prognozy z forecasting. Kończę cykl.")
             print("       RAW:", forecast["_raw"])
             return
 
         print(f"[FORECAST] Horyzont: {forecast['horizon_len']} kroków")
-        print(f"          consumption[0]={forecast['consumption'][0]:.2f}, production[0]={forecast['production'][0]:.2f}, net[0]={forecast['net'][0]:.2f}")
+        print(
+            f"          consumption[0]={forecast['consumption'][0]:.2f}, "
+            f"production[0]={forecast['production'][0]:.2f}, "
+            f"net[0]={forecast['net'][0]:.2f}"
+        )
 
         # 2) URZĄDZENIA
         devices = self.device_repo.get_all_active_devices()
@@ -131,18 +191,26 @@ class OptimizationController:
         failed_count = 0
 
         for device in devices:
-            print(f"\n--- Przetwarzanie urządzenia: {getattr(device, 'name', device)} (id={getattr(device, 'id', '?')}) ---")
+            device_id = getattr(device, "id", None)
+            device_name = getattr(device, "name", str(device))
+
+            print(f"\n--- Przetwarzanie urządzenia: {device_name} (id={device_id}) ---")
+
+            if device_id is None:
+                print("   [ERROR] Urządzenie nie ma id -> pomijam.")
+                failed_count += 1
+                continue
 
             try:
-                preference = self.pref_repo.get_preference_for_device(device.id)
+                preference = self.pref_repo.get_preference_for_device(device_id)
                 if preference is None:
-                    print("   [INFO] Brak preferencji -> algorytm powinien użyć domyślnych.")
+                    print("   [INFO] Brak preferencji -> algorytm użyje domyślnych.")
 
                 settings = calculate_optimal_settings(
                     device=device,
-                    forecast=forecast,          # <- teraz to ma sens
+                    forecast=forecast,
                     active_rules=active_rules,
-                    preference=preference
+                    preference=preference,
                 )
 
                 if not isinstance(settings, dict) or not settings:
@@ -150,13 +218,18 @@ class OptimizationController:
                     failed_count += 1
                     continue
 
-                print(f"   [WYNIK] Nastawy: {settings}")
+                cmd = self._build_simulation_command(settings, reason="OPTIMIZATION_CYCLE")
 
-                self.simulation_client.publish_command(device.id, settings)
-                processed_count += 1
+                print(f"   [WYNIK] Komenda do symulacji: {cmd}")
+
+                ok = self._send_to_simulation(device_id, cmd)
+                if ok:
+                    processed_count += 1
+                else:
+                    failed_count += 1
 
             except Exception as e:
                 failed_count += 1
-                print(f"   [ERROR] Błąd urządzenia id={getattr(device, 'id', '?')}: {e}")
+                print(f"   [ERROR] Błąd urządzenia id={device_id}: {e}")
 
         print(f"\n=== [KONIEC] Wysłano komendy dla {processed_count} urządzeń | Błędy: {failed_count} ===\n")

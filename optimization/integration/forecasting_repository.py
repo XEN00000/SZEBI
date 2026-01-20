@@ -13,31 +13,24 @@ class ForecastingRepository:
 
     def get_latest_forecast(self) -> Optional[Dict[str, Any]]:
         try:
-            # Import wewnątrz metody = brak problemów przy starcie Django / migrations
-            from forecasting.services import get_latest_forecast
+            # Forecasting ma klasę ForecastingService z metodą get_latest_forecast()
+            from forecasting.services import ForecastingService
         except Exception as e:
-            logger.error("[FORECAST] Nie mogę zaimportować forecasting.services.get_latest_forecast(): %s", e)
+            logger.error("[FORECAST] Nie mogę zaimportować ForecastingService: %s", e)
             return None
 
         try:
-            forecast = get_latest_forecast()
+            service = ForecastingService()
+            forecast = service.get_latest_forecast()
 
-            # forecast może być: dict / model / serializer output — normalizujemy do dict
             if forecast is None:
                 return None
 
             if isinstance(forecast, dict):
                 return forecast
 
-            # jeśli to model Django, to spróbujmy z niego zrobić dict “bezpiecznie”
-            if hasattr(forecast, "__dict__"):
-                # Uwaga: model ma dużo pól technicznych, więc lepiej jawnie mapować,
-                # ale tymczasowo to wystarczy do debug/testów
-                return {k: v for k, v in forecast.__dict__.items() if not k.startswith("_")}
-
-            # fallback
             return {"value": str(forecast)}
 
         except Exception as e:
-            logger.error("[FORECAST] Błąd przy get_latest_forecast(): %s", e)
+            logger.error("[FORECAST] Błąd przy ForecastingService.get_latest_forecast(): %s", e)
             return None
