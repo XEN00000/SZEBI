@@ -1,5 +1,4 @@
 import React, { useState, useCallback } from 'react';
-import { Zap } from 'lucide-react';
 import DashboardOptimization from '../components/optimalization/DashboardOptimization';
 import RuleManager from '../components/optimalization/RuleManager';
 import PreferenceManager from '../components/optimalization/PreferenceManager';
@@ -65,19 +64,12 @@ const OptimalizationPage = ({ userRole, userId }) => {
     }, []);
 
     return (
-        <div className="optimization-page">
+        <div className="acquisition-container">
             <div className="optimization-content">
                 {/* Page Header */}
-                <div className="page-header">
-                    <div className="page-header-content">
-                        <div className="page-header-icon">
-                            <Zap size={32} />
-                        </div>
-                        <div>
-                            <h1 className="page-title">Panel Optymalizacji</h1>
-                            <p className="page-subtitle">Zarządzanie regułami optymalizacji i preferencjami urządzeń</p>
-                        </div>
-                    </div>
+                <div className="header-section">
+                    <h1 className="page-title">Panel Optymalizacji</h1>
+                    <p className="page-subtitle">Zarządzanie regułami optymalizacji i preferencjami urządzeń</p>
                 </div>
 
                 {/* Notification Toast */}
