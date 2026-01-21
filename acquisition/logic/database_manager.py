@@ -143,7 +143,7 @@ class DatabaseManager:
 
             if len(batch) >= batch_size or (batch and self._measurement_queue.empty()):
                 try:
-                    Measurement.objects.bulk_create(batch)
+                    Measurement.objects.bulk_create(batch, ignore_conflicts=True)
                     # print(f"DEBUG DB: Flushed {len(batch)} measurements")
                 except Exception as e:
                     print(f"DB ERROR przy bulk_create: {e}")
@@ -152,7 +152,7 @@ class DatabaseManager:
         # zapis pozostałych elementów po zamknięciu kolejki
         if batch:
             try:
-                Measurement.objects.bulk_create(batch)
+                Measurement.objects.bulk_create(batch, ignore_conflicts=True)
             except Exception as e:
                 print(f"DB ERROR przy bulk_create końcowym: {e}")
 
@@ -176,14 +176,14 @@ class DatabaseManager:
 
             if len(batch) >= batch_size or (batch and self._log_queue.empty()):
                 try:
-                    DataLog.objects.bulk_create(batch)
+                    DataLog.objects.bulk_create(batch, ignore_conflicts=True)
                 except Exception as e:
                     print(f"DB ERROR przy bulk_create DataLog: {e}")
                 batch.clear()
 
         if batch:
             try:
-                DataLog.objects.bulk_create(batch)
+                DataLog.objects.bulk_create(batch, ignore_conflicts=True)
             except Exception as e:
                 print(f"DB ERROR przy bulk_create DataLog końcowym: {e}")
 

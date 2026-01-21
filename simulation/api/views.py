@@ -142,6 +142,27 @@ def get_simulation_status(request):
 
 
 @require_http_methods(['GET'])
+def get_simulation_summary(request):
+    total = SimulationConfig.objects.count()
+    last = SimulationConfig.objects.last()
+    return JsonResponse({
+        "total_simulations": total,
+        "last_simulation_date": str(last.id) if last else None  # Using ID as proxy for now if date missing
+    })
+
+
+@require_http_methods(['GET'])
+def get_simulation_history(request):
+    # Using ID descending as proxy for recency if date field missing
+    sims = SimulationConfig.objects.all().order_by('-id')[:10]
+    return JsonResponse([{
+        "id": str(s.id),
+        "name": s.name,
+        "date": "N/A" # Placeholder until model check
+    } for s in sims], safe=False)
+
+
+@require_http_methods(['GET'])
 def list_devices(request):
     sim_cfg, err = _get_sim_cfg(request)
     if err:
