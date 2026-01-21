@@ -70,6 +70,9 @@ urlpatterns = [
     # analysis module
     path("analysis/", include("analysis.urls")),
 
+    # simulation API
+    path("api/simulation/", include("simulation.api.urls")),
+
     # acquisition
     path('acquisition/', include('acquisition.urls')),
 ]

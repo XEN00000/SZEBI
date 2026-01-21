@@ -95,7 +95,7 @@ class RunOptimizationView(APIView):
         try:
             controller = OptimizationController()
             controller.run_optimization_cycle()
-            
+
             # Utwórz log sukcesu
             log = OptimizationLog.objects.create(
                 status='success',
@@ -103,9 +103,9 @@ class RunOptimizationView(APIView):
                 message='Cykl optymalizacji wykonany pomyślnie',
                 affected_devices_count=0
             )
-            
+
             return Response({
-                "status": "success", 
+                "status": "success",
                 "message": "Cykl uruchomiony",
                 "log_id": log.id
             }, status=status.HTTP_200_OK)

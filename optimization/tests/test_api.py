@@ -2,7 +2,7 @@ from django.test import TestCase
 from rest_framework.test import APIClient
 from rest_framework import status
 from django.utils import timezone
-from simulation.models import Device
+from simulation.api.models import DeviceConfig
 
 class ApiTestCase(TestCase):
     """
@@ -14,7 +14,7 @@ class ApiTestCase(TestCase):
         self.client = APIClient()
         # Tworzymy urządzenie o ID=1, ponieważ nasz kontroler (w logice adaptera)
         # hardcoduje sterowanie urządzeniem ID=1 w przypadku awarii.
-        self.device = Device.objects.create(
+        self.device = DeviceConfig.objects.create(
             id=1, 
             name="Test Device", 
             device_type="CONSUMER", 

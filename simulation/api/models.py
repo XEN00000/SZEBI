@@ -1,66 +1,84 @@
 from django.db import models
-from django.utils import timezone
-import datetime
+import uuid
 
-class SimulationState(models.Model):
-    """
-    Singleton - przechowuje aktualny wirtualny czas symulacji.
-    Tylko jeden rekord w tej tabeli powinien istnieć.
-    """
-    current_sim_time = models.DateTimeField(default=timezone.now)
-    is_running = models.BooleanField(default=False)
-    
-    def save(self, *args, **kwargs):
-        self.pk = 1 # Zawsze nadpisujemy ID=1, żeby mieć tylko jeden stan
-        super(SimulationState, self).save(*args, **kwargs)
-
-    @classmethod
-    def get_state(cls):
-        obj, created = cls.objects.get_or_create(pk=1)
-        return obj
+class SimulationConfig(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=100, unique=True)
+    base_millis_per_tick = models.PositiveIntegerField(default=60 * 60 * 1000)
+    simulated_millis_per_tick = models.PositiveIntegerField(default=5* 1000)
+    consumption_mode = models.CharField(max_length=50, default="normal")
+    charging_mode = models.CharField(max_length=50, default="balanced")
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Symulacja: {self.current_sim_time.strftime('%Y-%m-%d %H:%M')}"
+        return self.name
 
-class EnergyTariff(models.Model):
-    """Definicja taryfy dostawcy energii."""
-    name = models.CharField(max_length=50) # np. G11, G12-Szczyt
-    price_per_kwh = models.DecimalField(max_digits=6, decimal_places=4)
-    # Uproszczone godziny obowiązywania (0-23)
-    start_hour = models.IntegerField(default=0)
-    end_hour = models.IntegerField(default=23)
 
-    def __str__(self):
-        return f"{self.name} ({self.price_per_kwh} PLN)"
-
-class Device(models.Model):
-    """Urządzenia w budynku (odbiorniki i źródła)."""
+class WeatherConfig(models.Model):
+    TYPE_OUTSIDE = "outside"
+    TYPE_INSIDE = "inside"
     TYPE_CHOICES = [
-        ('CONSUMER', 'Odbiornik (np. HVAC, Oświetlenie)'),
-        ('PRODUCER', 'Producent (np. Fotowoltaika)'),
-        ('STORAGE', 'Magazyn Energii'),
+        (TYPE_OUTSIDE, "Outside"),
+        (TYPE_INSIDE, "Inside"),
     ]
-    
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    simulation = models.ForeignKey(SimulationConfig, on_delete=models.CASCADE, related_name="weathers")
     name = models.CharField(max_length=100)
-    device_type = models.CharField(max_length=20, choices=TYPE_CHOICES)
+    type = models.CharField(max_length=20, choices=TYPE_CHOICES)
+    outside_ref = models.ForeignKey("self", null=True, blank=True, on_delete=models.SET_NULL, related_name="inside_weathers")
+
+    # Bazowe parametry (mogą być nadpisane przez logikę symulacji)
+    temperature_c = models.FloatField(default=20.0)
+    sunlight = models.FloatField(default=0.5)
+    brightness = models.FloatField(default=0.5)
+    cloudiness = models.FloatField(default=0.3)
+    wind_speed = models.FloatField(default=2.0)
+
+    extra = models.JSONField(default=dict, blank=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.get_type_display()})"
+
+
+class DeviceConfig(models.Model):
+    TYPE_LIGHTING = "lighting"
+    TYPE_AC = "airconditioning"
+    TYPE_PV = "photovoltaic"
+    TYPE_STORAGE = "energystorage"
+    TYPE_GRID = "electricgrid"
+    TYPE_HEATING = "heating"
+    TYPE_WINDTURBINE = "windturbine"
+    TYPE_CHOICES = [
+        (TYPE_LIGHTING, "Lighting"),
+        (TYPE_AC, "Air Conditioning"),
+        (TYPE_PV, "Photovoltaic"),
+        (TYPE_STORAGE, "Energy Storage"),
+        (TYPE_GRID, "Electric Grid"),
+        (TYPE_HEATING, "Heating System"),
+        (TYPE_WINDTURBINE, "Wind Turbine"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    simulation = models.ForeignKey(SimulationConfig, on_delete=models.CASCADE, related_name="devices")
+    name = models.CharField(max_length=100)
+    type = models.CharField(max_length=30, choices=TYPE_CHOICES)
+    weather_ref = models.ForeignKey(WeatherConfig, on_delete=models.CASCADE, related_name="devices")
+
     is_active = models.BooleanField(default=True)
-    nominal_power = models.FloatField(help_text="Moc w kW (dodatnia)")
-    
-    # Opcjonalnie: priorytet (do optymalizacji)
-    priority = models.IntegerField(default=1, help_text="1 = krytyczne, 10 = można wyłączyć")
+    initial_level = models.FloatField(null=True, blank=True)  # np. 0..1 dla dimmera/AC
+    initial_is_on = models.BooleanField(default=True)
+
+    # Uniwersalne parametry mocy/energii (używane zależnie od typu)
+    power_watts = models.FloatField(null=True, blank=True)          # lighting/AC
+    light_output = models.FloatField(null=True, blank=True)         # lighting
+    cooling_power = models.FloatField(null=True, blank=True)        # AC
+    peak_power = models.FloatField(null=True, blank=True)           # PV
+    capacity_wh = models.FloatField(null=True, blank=True)          # storage
+    max_charge_w = models.FloatField(null=True, blank=True)         # storage
+    max_discharge_w = models.FloatField(null=True, blank=True)      # storage
+
+    extra = models.JSONField(default=dict, blank=True)
 
     def __str__(self):
-        return f"{self.name} ({self.device_type}) - {self.nominal_power}kW"
-
-class WeatherData(models.Model):
-    """Historia i prognoza pogody."""
-    timestamp = models.DateTimeField()
-    temperature = models.FloatField()
-    cloud_cover = models.FloatField(help_text="0-100%")
-    wind_speed = models.FloatField(default=0.0)
-
-    class Meta:
-        ordering = ['-timestamp']
-
-    def __str__(self):
-        return f"{self.timestamp}: {self.temperature}°C"
+        return f"{self.name} ({self.get_type_display()})"
