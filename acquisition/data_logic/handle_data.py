@@ -16,14 +16,15 @@ class HandleData:
         self.transformer = transformer
         self.db_manager = db_manager
 
-    def process(self, topic: str, raw_message: str) -> Optional[Measurement]:
+    def process(self, topic: str, raw_message: str) -> list[Measurement]:
+        measurements = []
         try:
             try:
                 data = json.loads(raw_message)
             except json.JSONDecodeError:
                 self._log_error("Błędny format JSON wiadomości MQTT", level=DataLogLevel.ERROR,
                                 topic=topic, raw_message=raw_message)
-                return None
+                return []
 
             # --- obsługa różnych topiców ---
             if topic.startswith("szebi/status"):
@@ -32,51 +33,92 @@ class HandleData:
                 charging_mode = data.get("charging_mode")
                 self._log_error(f"System status: consumption={consumption_mode}, charging={charging_mode}",
                                 level=DataLogLevel.INFO, raw_message=raw_message)
-                return None
+                return []
+
+            metrics_to_process = []
+            env_uuid = None
 
             # Weather: szebi/weather/<uuid>/<metryka>
             if topic.startswith("szebi/weather/") or topic.startswith("szebi/device/state/"):
                 parts = topic.split("/")
                 if len(parts) < 4:
-                    return None
+                    return []
                 
                 if topic.startswith("szebi/device/state/"):
                      env_uuid = parts[3]
+                     # Device generic payload
+                     known_metrics_map = {
+                         "power_usage": "W",
+                         "available_energy": "Wh",
+                         "peak_power": "W",
+                         "charge": "Wh",
+                         "capacity_watts": "Wh",
+                         "level": "fraction",
+                         "max_charge_watts": "W",
+                         "max_discharge_watts": "W",
+                         "connection_power": "W"
+                     }
+                     for m, unit in known_metrics_map.items():
+                        if m in data:
+                            metrics_to_process.append((m, data[m], data.get("unit", unit)))
+                     
+                     if not metrics_to_process and ("is_active" in data or "level" in data):
+                         val = data.get("level", 1.0 if data.get("is_active") else 0.0)
+                         metrics_to_process.append(("is_active", val, "boolean"))
+
                 else: 
                      env_uuid = parts[2]  # uuid pogody
+                     metric_name = data.get("metric_name") or "is_active"
+                     # Weather payload usually puts value in 'value'
+                     if "value" in data:
+                         val = data["value"]
+                     elif "is_active" in data:
+                         val = data.get("level", 1.0 if data["is_active"] else 0.0)
+                     else:
+                         val = 0.0
+                     
+                     unit = data.get("unit", "standard")
+                     metrics_to_process.append((metric_name, val, unit))
 
-                metric_name = data.get("metric_name") or "is_active"
             else:
                 self._log_error(f"Nieznany topic: {topic}", level=DataLogLevel.WARNING, raw_message=raw_message)
-                return None
+                return []
 
-            # Konwersja surowych danych na obiekt modelu
-            measurement = self._convert_raw_to_measurement(env_uuid, metric_name, data, topic)
-            if not measurement:
-                return None
+            for m_name, m_val, m_unit in metrics_to_process:
+                # Prepare a single-metric data dict for validation/logging context
+                single_data = data.copy()
+                single_data["metric_name"] = m_name
+                single_data["value"] = m_val
+                single_data["unit"] = m_unit
 
-            # Walidacja
-            is_valid = self.validator.validate(measurement, topic=topic, raw_message=raw_message)
-            if not is_valid:
-                measurement.status = MeasurementStatus.ERROR
-                self._log_error(f"Wartość {measurement.value} poza zakresem dla {metric_name}",
-                                level=DataLogLevel.WARNING,
-                                measurement=measurement,
-                                topic=topic,
-                                raw_message=raw_message)
+                measurement = self._convert_raw_to_measurement(env_uuid, m_name, single_data, topic)
+                if not measurement:
+                    continue
 
-            # Deduplikacja
-            if self.deduplicator.merge_duplicates(measurement):
-                measurement.status = MeasurementStatus.DUPLICATE
+                # Walidacja
+                is_valid = self.validator.validate(measurement, topic=topic, raw_message=raw_message)
+                if not is_valid:
+                    measurement.status = MeasurementStatus.ERROR
+                    self._log_error(f"Wartość {measurement.value} poza zakresem dla {m_name}",
+                                    level=DataLogLevel.WARNING,
+                                    measurement=measurement,
+                                    topic=topic,
+                                    raw_message=raw_message)
 
-            # Transformacja
-            measurement = self.transformer.convert_units(measurement)
+                # Deduplikacja
+                if self.deduplicator.merge_duplicates(measurement):
+                    measurement.status = MeasurementStatus.DUPLICATE
 
-            # Zapis do bazy i aktualizacja komunikacji sensora
-            self.db_manager.insert_measurements(measurement)
-            self.db_manager.update_sensor(measurement.sensor.id, measurement.timestamp)
+                # Transformacja
+                measurement = self.transformer.convert_units(measurement)
 
-            return measurement
+                # Zapis do bazy i aktualizacja komunikacji sensora
+                self.db_manager.insert_measurements(measurement)
+                self.db_manager.update_sensor(measurement.sensor.id, measurement.timestamp)
+                
+                measurements.append(measurement)
+
+            return measurements
 
 
         except Exception as e:
@@ -84,7 +126,7 @@ class HandleData:
                             level=DataLogLevel.CRITICAL,
                             topic=topic,
                             raw_message=raw_message)
-            return None
+            return []
 
     def _convert_raw_to_measurement(self, env_uuid: str, metric_name: str, data: Dict, topic: Optional[str] = None) -> Optional[Measurement]:
         try:

@@ -84,9 +84,10 @@ def stop_mqtt_worker():
 #                     # for message in raw_messages:
 #                     #     measurement = data_handler.process(message)
 #                     for topic, payload in raw_messages:
-#                         measurement = data_handler.process(topic, payload)
-#                         if measurement:
-#                             acquisition_service.post_to_alarms(measurement)
+#                         measurements = data_handler.process(topic, payload)
+#                         if measurements:
+#                             for measurement in measurements:
+#                                 acquisition_service.post_to_alarms(measurement)
 #
 #             for _ in range(10):
 #                 if _stop_event.is_set(): break
@@ -147,10 +148,11 @@ def _acquisition_loop():
                 continue
 
             topic, payload = topic_payload
-            measurement = data_handler.process(topic, payload)
+            measurements = data_handler.process(topic, payload)
 
-            if measurement:
-                acquisition_service.post_to_alarms(measurement)
+            if measurements:
+                for measurement in measurements:
+                    acquisition_service.post_to_alarms(measurement)
 
             mqtt_manager.message_queue.task_done()
 
