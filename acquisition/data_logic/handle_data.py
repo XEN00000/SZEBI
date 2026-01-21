@@ -174,8 +174,12 @@ class HandleData:
         if raw_message:
             full_message += f" | raw: {raw_message}"
 
+        # Tylko linkuj measurement jeśli został zapisany (ma pk)
+        # W przeciwnym razie None (np. gdy został pominięty przez ignore_conflicts)
+        measurement_ref = measurement if (measurement and measurement.pk) else None
+
         self.db_manager.insert_data_log(DataLog(
-            measurement=measurement,
+            measurement=measurement_ref,
             level=level,
             message=full_message[:255]
         ))

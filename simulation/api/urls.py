@@ -9,6 +9,8 @@ urlpatterns = [
     path('start_default', views.start_default_simulation, name="start_default"),
     path('stop', views.stop_simulation, name="stop"),
     path('status', views.get_simulation_status, name="status"),
+    path('summary', views.get_simulation_summary, name="summary"),
+    path('history', views.get_simulation_history, name="history"),
     
     path('device/list', views.list_devices, name="device_list"),
     path('device/status/<uuid:device_uuid>', views.device_status, name="device_status"),

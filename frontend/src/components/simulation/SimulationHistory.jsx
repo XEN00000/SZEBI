@@ -10,7 +10,7 @@ const SimulationHistory = () => {
     useEffect(() => {
         setLoading(true);
         setError(null);
-        fetch(`${API_BASE_URL}/api/simulation/history/`, {
+        fetch(`${API_BASE_URL}/api/simulation/history`, {
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' }
         })
@@ -27,19 +27,34 @@ const SimulationHistory = () => {
     if (error) return <div className="text-red-500">{error}</div>;
 
     return (
-        <div className="mt-6">
-            <h3 className="text-lg font-semibold mb-2">Historia symulacji</h3>
-            {history.length > 0 ? (
-                <ul className="list-disc ml-6">
-                    {history.map(sim => (
-                        <li key={sim.id}>
-                            {sim.name} ({sim.date})
-                        </li>
-                    ))}
-                </ul>
-            ) : (
-                <div>Brak przeprowadzonych symulacji.</div>
-            )}
+        <div className="data-card mt-6" style={{ backgroundColor: 'rgba(255, 255, 255, 0.02)' }}>
+            <div className="card-header" style={{ backgroundColor: 'rgba(255, 255, 255, 0.01)' }}>
+                 <h2 className="card-title">Historia Symulacji</h2>
+            </div>
+            
+            <div className="logs-container">
+                {history.length > 0 ? (
+                    <ul className="logs-list">
+                        {history.map(sim => (
+                            <li key={sim.id} className="log-item">
+                                <div className="log-header">
+                                    <span className="badge-count" style={{borderRadius: '0.375rem'}}>
+                                        {sim.name}
+                                    </span>
+                                    <span className="log-time">{sim.date}</span>
+                                </div>
+                                <p className="log-message text-sm text-gray-400">
+                                    Symulacja ID: <span className="font-mono text-white">{sim.id}</span>
+                                </p>
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <div className="empty-state">
+                        Brak przeprowadzonych symulacji w historii.
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

@@ -11,11 +11,23 @@ const SimulationPage = () => {
     };
 
     return (
-        <div className="container mx-auto py-6">
-            <h1 className="text-2xl font-bold mb-4">Moduł symulacji</h1>
-            <DashboardSimulation refreshKey={refreshKey} />
-            <SimulationManager onSimulationRun={handleSimulationRun} />
-            <SimulationHistory key={refreshKey} />
+        <div className="acquisition-container">
+            <div className="acquisition-content">
+                <div className="header-section">
+                    <h1 className="page-title">Moduł Symulacji</h1>
+                    <p className="page-subtitle">Zarządzanie wirtualnymi urządzeniami i scenariuszami testowymi</p>
+                    
+                    <DashboardSimulation refreshKey={refreshKey} />
+                </div>
+
+                <div className="manager-section">
+                    <SimulationManager onSimulationRun={handleSimulationRun} />
+                </div>
+
+                <div className="history-section">
+                    <SimulationHistory key={refreshKey} />
+                </div>
+            </div>
         </div>
     );
 };

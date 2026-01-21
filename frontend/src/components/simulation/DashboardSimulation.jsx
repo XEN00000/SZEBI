@@ -10,7 +10,7 @@ const DashboardSimulation = ({ refreshKey }) => {
     useEffect(() => {
         setLoading(true);
         setError(null);
-        fetch(`${API_BASE_URL}/api/simulation/summary/`, {
+        fetch(`${API_BASE_URL}/api/simulation/summary`, {
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' }
         })
@@ -23,21 +23,44 @@ const DashboardSimulation = ({ refreshKey }) => {
             .finally(() => setLoading(false));
     }, [refreshKey]);
 
-    if (loading) return <div>Ładowanie podsumowania...</div>;
-    if (error) return <div className="text-red-500">{error}</div>;
+    const formatDate = (dateStr) => {
+        if (!dateStr) return '-';
+        return new Date(dateStr).toLocaleString('pl-PL');
+    };
+
+    if (loading) return (
+         <div className="status-card h-32 flex items-center justify-center">
+            <span className="text-secondary animate-pulse">Ładowanie podsumowania...</span>
+         </div>
+    );
+
+    if (error) return (
+        <div className="status-card h-32 flex items-center justify-center">
+            <span className="text-red-500">{error}</span>
+        </div>
+    );
 
     return (
-        <div className="mb-6">
-            <h2 className="text-xl font-semibold mb-2">Panel symulacji</h2>
-            {summary ? (
-                <div>
-                    <div>Liczba symulacji: {summary.total_simulations}</div>
-                    <div>Ostatnia symulacja: {summary.last_simulation_date}</div>
-                    {/* Dodaj więcej pól według potrzeb */}
+        <div className="status-card flex-row justify-between items-stretch gap-8">
+            <div className="status-indicator-box flex-1 justify-between">
+                <span className="status-label">Liczba Symulacji</span>
+                <div className="status-divider"></div>
+                <div className="status-display">
+                     <span className="stat-value text-3xl font-bold text-active">
+                        {summary ? summary.total_simulations : 0}
+                     </span>
                 </div>
-            ) : (
-                <div>Brak danych do wyświetlenia.</div>
-            )}
+            </div>
+
+            <div className="status-indicator-box flex-1 justify-between">
+                <span className="status-label">Ostatnia Aktywność</span>
+                <div className="status-divider"></div>
+                <div className="status-display">
+                    <span className="status-text text-white font-mono text-sm">
+                        {summary ? formatDate(summary.last_simulation_date) : '-'}
+                    </span>
+                </div>
+            </div>
         </div>
     );
 };
