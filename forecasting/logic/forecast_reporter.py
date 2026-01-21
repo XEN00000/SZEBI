@@ -9,10 +9,11 @@ class ForecastReporter:
         self.modelID = None
         self.creationTime = timezone.now()
 
-    def generateReport(self, predicted_values=None, model_id=None):
+    def generateReport(self, predicted_values=None, model_id=None, timestamps=None):
         self.forecastID = uuid.uuid4()
         self.predictedValues = predicted_values
         self.modelID = model_id
+        self.timestamps = timestamps
         self.creationTime = timezone.now()
 
     def saveToDatabase(self):
@@ -21,10 +22,16 @@ class ForecastReporter:
 
         consumption = [float(row[0]) for row in self.predictedValues]
         production = [float(row[1]) for row in self.predictedValues]
+        
+        # Format timestamps as strings if provided
+        ts_list = []
+        if self.timestamps is not None:
+            ts_list = [t.isoformat() for t in self.timestamps]
 
         formatted_result = {
             "model_id": str(self.modelID),
             "generated_at": str(self.creationTime),
+            "timestamps": ts_list,
             "consumption": consumption,
             "production": production
         }

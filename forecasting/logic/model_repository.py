@@ -5,8 +5,13 @@ from typing import Dict, List, Optional
 from .prediction_model import PredictionModel
 
 
-# UWAGA: USUNĘLIŚMY IMPORTY RandomForestModel, XGBoostModel, LSTMModel
-# Repozytorium nie zna tych klas bezpośrednio!
+
+from .random_forest_model import RandomForestModel
+from .xgboost_model import XGBoostModel
+from .lstm_model import LSTMModel
+
+# Repozytorium korzysta z __subclasses__(), więc te importy SĄ POTRZEBNE,
+# aby klasy zostały zarejestrowane w pamięci.
 
 class ModelRepository:
     def __init__(self):
