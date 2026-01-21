@@ -1,6 +1,6 @@
 from optimization.integration.mqtt.device_cache import device_cache
 from optimization.models import OptimizationRule, UserPreference
-from simulation.models import Device
+from simulation.api.models import DeviceConfig
 
 class RuleRepository:
     """
