@@ -15,6 +15,12 @@ fi
 echo "Apply database migrations"
 python manage.py migrate --noinput
 
+echo "Using .venv"
+./.venv/Scripts/activate
+
+echo "Installing dependencies"
+pip install -r requirements.txt
+
 if [ "$DJANGO_PRODUCTION" = "1" ]; then
   echo "Starting Gunicorn"
   exec gunicorn szebi_core.wsgi:application --bind 0.0.0.0:8000 --workers 3
