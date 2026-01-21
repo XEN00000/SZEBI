@@ -38,17 +38,17 @@ const Forecasting = ({ user }) => {
 
     const handleTrainModels = async () => {
         setIsProcessing(true);
-        setStatusMessage("Inżynier: Trwa przygotowanie danych historycznych i trenowanie modeli...");
+        setStatusMessage("Engineer: Preparing historical data and training models...");
         setError(null);
         try {
             const response = await fetch('http://localhost:8000/api/forecasting/train/', { method: 'POST' });
             if (response.ok) {
-                setStatusMessage("Sukces: Modele XGBoost, RF i LSTM zostały wytrenowane i zwalidowane.");
+                setStatusMessage("Success: XGBoost, RF, and LSTM models trained and validated.");
             } else {
-                setError("Błąd podczas cyklu treningowego.");
+                setError("Error during training cycle.");
             }
         } catch (err) {
-            setError("Błąd komunikacji podczas treningu.");
+            setError("Communication error during training.");
         } finally {
             setIsProcessing(false);
         }
@@ -56,27 +56,29 @@ const Forecasting = ({ user }) => {
 
     const handleGenerateForecast = async () => {
         setIsProcessing(true);
-        setStatusMessage("Administrator: PredictionManager generuje nową prognozę...");
+        setStatusMessage("Administrator: PredictionManager generating new forecast...");
         setError(null);
         try {
             const response = await fetch('http://localhost:8000/api/forecasting/generate/', { method: 'POST' });
             if (response.ok) {
-                setStatusMessage("Sukces: Nowa prognoza została wygenerowana i zapisana w bazie.");
+                setStatusMessage("Success: New forecast generated and saved to database.");
                 await fetchLatestForecast();
             }
         } catch (err) {
-            setError("Błąd połączenia podczas generowania.");
+            setError("Connection error during generation.");
         } finally {
             setIsProcessing(false);
         }
     };
 
+    // Pobieranie danych tylko dla Administratora
+    // ... (omitting comment translation for code brevity, but UI strings follow)
     return (
         <div className="acquisition-container">
             <div className="acquisition-content">
                 <div className="header-section">
-                    <h1 className="page-title">Moduł Prognozowania Energii</h1>
-                    <p className="page-subtitle">Przewidywanie zużycia i produkcji energii</p>
+                    <h1 className="page-title">Energy Forecasting Module</h1>
+                    <p className="page-subtitle">Energy consumption and production forecasting</p>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
@@ -86,13 +88,13 @@ const Forecasting = ({ user }) => {
                         <div style={{ padding: '1.5rem', backgroundColor: 'var(--bg-card)', borderRadius: '1rem', border: '1px solid var(--border-color)', gridColumn: '1 / -1' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
                                 <Cpu className="text-blue-400" size={24} />
-                                <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#60a5fa' }}>Panel Inżyniera Utrzymania Ruchu</h3>
+                                <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#60a5fa' }}>Maintenance Engineer Panel</h3>
                             </div>
                             <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-                                Zgodnie z procedurą: System pobierze dane historyczne, przeprowadzi trening XGBoost, RF, LSTM i wybierze model z najniższym MAPE.
+                                Procedures: System fetches historical data, trains XGBoost, RF, LSTM models, and selects the model with the lowest MAPE.
                             </p>
                             <button onClick={handleTrainModels} disabled={isProcessing} className="login-btn" style={{ width: 'fit-content', padding: '0.75rem 2rem', marginTop: 0, backgroundColor: '#2563eb' }}>
-                                {isProcessing ? <Loader2 className="animate-spin" /> : <><RefreshCw size={18} /> Ręczne trenowanie modeli</>}
+                                {isProcessing ? <Loader2 className="animate-spin" /> : <><RefreshCw size={18} /> Manual Model Training</>}
                             </button>
                         </div>
                     )}
@@ -102,13 +104,13 @@ const Forecasting = ({ user }) => {
                         <div style={{ padding: '1.5rem', backgroundColor: 'var(--bg-card)', borderRadius: '1rem', border: '1px solid var(--border-color)', gridColumn: '1 / -1' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
                                 <FileText className="text-emerald-400" size={24} />
-                                <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#34d399' }}>Panel Administratora Budynku</h3>
+                                <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#34d399' }}>Building Admin Panel</h3>
                             </div>
                             <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-                                Generowanie serii danych prognozy na podstawie aktualnie aktywnych modeli w repozytorium.
+                                Generate forecast data series based on currently active models in the repository.
                             </p>
                             <button onClick={handleGenerateForecast} disabled={isProcessing} className="login-btn" style={{ width: 'fit-content', padding: '0.75rem 2rem', marginTop: 0, backgroundColor: '#059669' }}>
-                                {isProcessing ? <Loader2 className="animate-spin" /> : <><Play size={18} /> Generuj prognozę</>}
+                                {isProcessing ? <Loader2 className="animate-spin" /> : <><Play size={18} /> Generate Forecast</>}
                             </button>
                         </div>
                     )}
@@ -135,9 +137,9 @@ const Forecasting = ({ user }) => {
                             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                                 <thead>
                                     <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)', fontSize: '0.75rem' }}>
-                                        <th style={{ padding: '1rem' }}>DATA I GODZINA</th>
-                                        <th style={{ padding: '1rem' }}><Zap size={14} style={{ display: 'inline', marginRight: '4px' }} /> ZUŻYCIE (KWH)</th>
-                                        <th style={{ padding: '1rem' }}><Sun size={14} style={{ display: 'inline', marginRight: '4px' }} /> PRODUKCJA (KWH)</th>
+                                        <th style={{ padding: '1rem' }}>DATE AND TIME</th>
+                                        <th style={{ padding: '1rem' }}><Zap size={14} style={{ display: 'inline', marginRight: '4px' }} /> CONSUMPTION (KWH)</th>
+                                        <th style={{ padding: '1rem' }}><Sun size={14} style={{ display: 'inline', marginRight: '4px' }} /> PRODUCTION (KWH)</th>
                                         <th style={{ padding: '1rem' }}>STATUS</th>
                                     </tr>
                                 </thead>

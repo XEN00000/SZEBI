@@ -6,14 +6,14 @@ const ProtectedRoute = ({ user, allowedRoles, children }) => {
     return <Navigate to="/login" replace />;
   }
 
-  const userRole = user.role; 
+  const userRole = user.role;
 
   if (allowedRoles && !allowedRoles.includes(userRole)) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center p-8 bg-gray-800 rounded-lg border border-gray-700">
-          <h2 className="text-xl text-red-500 mb-2">Brak uprawnień</h2>
-          <p className="text-gray-400">Twoja rola ({userRole}) nie ma dostępu do tego modułu.</p>
+          <h2 className="text-xl text-red-500 mb-2">Access Denied</h2>
+          <p className="text-gray-400">Your role ({userRole}) does not have access to this module.</p>
         </div>
       </div>
     );

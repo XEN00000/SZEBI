@@ -15,11 +15,11 @@ const DashboardSimulation = ({ refreshKey }) => {
             headers: { 'Content-Type': 'application/json' }
         })
             .then(res => {
-                if (!res.ok) throw new Error('Błąd pobierania podsumowania');
+                if (!res.ok) throw new Error('Error fetching summary');
                 return res.json();
             })
             .then(data => setSummary(data))
-            .catch(() => setError('Nie udało się pobrać podsumowania.'))
+            .catch(() => setError('Failed to fetch summary.'))
             .finally(() => setLoading(false));
     }, [refreshKey]);
 
@@ -29,9 +29,9 @@ const DashboardSimulation = ({ refreshKey }) => {
     };
 
     if (loading) return (
-         <div className="status-card h-32 flex items-center justify-center">
-            <span className="text-secondary animate-pulse">Ładowanie podsumowania...</span>
-         </div>
+        <div className="status-card h-32 flex items-center justify-center">
+            <span className="text-secondary animate-pulse">Loading summary...</span>
+        </div>
     );
 
     if (error) return (
@@ -43,17 +43,17 @@ const DashboardSimulation = ({ refreshKey }) => {
     return (
         <div className="status-card flex-row justify-between items-stretch gap-8">
             <div className="status-indicator-box flex-1 justify-between">
-                <span className="status-label">Liczba Symulacji</span>
+                <span className="status-label">Simulation Count</span>
                 <div className="status-divider"></div>
                 <div className="status-display">
-                     <span className="stat-value text-3xl font-bold text-active">
+                    <span className="stat-value text-3xl font-bold text-active">
                         {summary ? summary.total_simulations : 0}
-                     </span>
+                    </span>
                 </div>
             </div>
 
             <div className="status-indicator-box flex-1 justify-between">
-                <span className="status-label">Ostatnia Aktywność</span>
+                <span className="status-label">Last Activity</span>
                 <div className="status-divider"></div>
                 <div className="status-display">
                     <span className="status-text text-white font-mono text-sm">

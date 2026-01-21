@@ -37,7 +37,7 @@ const PreferenceManager = ({ notification, setNotification, userRole, userId, re
                 const prefData = await prefRes.json();
                 const prefList = Array.isArray(prefData) ? prefData : prefData.results || [];
                 setPreferences(prefList);
-                
+
                 // Filtruj tylko moje preferencje dla zwykłego użytkownika
                 if (!isAdmin && userId) {
                     const myPrefs = prefList.filter(p => p.user_id === userId);
@@ -59,7 +59,7 @@ const PreferenceManager = ({ notification, setNotification, userRole, userId, re
             }
         } catch (error) {
             console.error('Error fetching data:', error);
-            setNotification({ type: 'error', message: 'Nie udało się pobrać danych.' });
+            setNotification({ type: 'error', message: 'Failed to fetch data.' });
         } finally {
             setLoading(false);
             setDevicesLoading(false);
@@ -87,20 +87,20 @@ const PreferenceManager = ({ notification, setNotification, userRole, userId, re
 
             if (!response.ok) throw new Error('Failed to add preference');
 
-            setNotification({ type: 'success', message: 'Preferencja dodana.' });
+            setNotification({ type: 'success', message: 'Preference added.' });
             setShowAddModal(false);
             setFormData({ device: '', target_value: '', schedule: JSON.stringify({}) });
             fetchData();
             if (onPreferenceChange) onPreferenceChange();
         } catch (error) {
             console.error('Error adding preference:', error);
-            setNotification({ type: 'error', message: 'Nie udało się dodać preferencji.' });
+            setNotification({ type: 'error', message: 'Failed to add preference.' });
         }
         setTimeout(() => setNotification(null), 4000);
     };
 
     const handleDeletePreference = async (prefId) => {
-        const confirmed = window.confirm('Czy na pewno chcesz usunąć tę preferencję?');
+        const confirmed = window.confirm('Are you sure you want to delete this preference?');
         if (!confirmed) return;
 
         setDeletingId(prefId);
@@ -117,12 +117,12 @@ const PreferenceManager = ({ notification, setNotification, userRole, userId, re
 
             if (!response.ok) throw new Error('Failed to delete preference');
 
-            setNotification({ type: 'success', message: 'Preferencja usunięta.' });
+            setNotification({ type: 'success', message: 'Preference deleted.' });
             fetchData();
             if (onPreferenceChange) onPreferenceChange();
         } catch (error) {
             console.error('Error deleting preference:', error);
-            setNotification({ type: 'error', message: 'Nie udało się usunąć preferencji.' });
+            setNotification({ type: 'error', message: 'Failed to delete preference.' });
         } finally {
             setDeletingId(null);
             setTimeout(() => setNotification(null), 4000);
@@ -130,36 +130,36 @@ const PreferenceManager = ({ notification, setNotification, userRole, userId, re
     };
 
     const displayPreferences = isAdmin ? preferences : myPreferences;
-    const displayText = isAdmin ? 'Wszystkie preferencje' : 'Moje preferencje';
+    const displayText = isAdmin ? 'All preferences' : 'My preferences';
 
     return (
         <div className="preferences-card">
             <div className="preferences-card-header">
                 <div>
-                    <h3>Preferencje użytkownika</h3>
-                    {isAdmin && <p className="role-notice"><Lock size={14} /> Administrator - przeglądanie wszystkich preferencji</p>}
-                    {!isAdmin && <p className="role-notice">Zarządzaj swoimi preferencjami dla urządzeń z MQTT</p>}
+                    <h3>User Preferences</h3>
+                    {isAdmin && <p className="role-notice"><Lock size={14} /> Administrator - viewing all preferences</p>}
+                    {!isAdmin && <p className="role-notice">Manage your preferences for MQTT devices</p>}
                 </div>
-                <button 
+                <button
                     onClick={() => setShowAddModal(true)}
                     className="btn-add-rule"
                 >
                     <Plus size={18} />
-                    Dodaj preferencję
+                    Add preference
                 </button>
             </div>
 
             {devicesLoading && !devices.length && (
                 <div className="devices-loading">
                     <AlertCircle size={20} />
-                    <span>Wczytywanie urządzeń z MQTT...</span>
+                    <span>Loading MQTT devices...</span>
                 </div>
             )}
 
             {devices.length === 0 && !devicesLoading && (
                 <div className="error-message">
                     <AlertCircle size={20} />
-                    <span>Brak dostępnych urządzeń w sieci MQTT</span>
+                    <span>No devices available in MQTT network</span>
                 </div>
             )}
 
@@ -167,7 +167,7 @@ const PreferenceManager = ({ notification, setNotification, userRole, userId, re
                 <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
                     <div className="modal-container" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
-                            <h2 className="modal-title">Dodaj preferencję dla urządzenia</h2>
+                            <h2 className="modal-title">Add preference for device</h2>
                             <button onClick={() => setShowAddModal(false)} className="modal-close">
                                 ✕
                             </button>
@@ -176,7 +176,7 @@ const PreferenceManager = ({ notification, setNotification, userRole, userId, re
                             <div className="form-grid">
                                 <div className="form-group form-group-full">
                                     <label className="form-label">
-                                        Urządzenie <span className="required">*</span>
+                                        Device <span className="required">*</span>
                                     </label>
                                     <select
                                         value={formData.device}
@@ -184,36 +184,36 @@ const PreferenceManager = ({ notification, setNotification, userRole, userId, re
                                         className="form-select"
                                         required
                                     >
-                                        <option value="">Wybierz urządzenie z MQTT...</option>
+                                        <option value="">Select MQTT device...</option>
                                         {devices.map(dev => (
                                             <option key={dev.uuid || dev.id} value={dev.id || dev.uuid}>
                                                 {dev.name || dev.uuid} {dev.device_type ? `(${dev.device_type})` : ''}
                                             </option>
                                         ))}
                                     </select>
-                                    <span className="form-hint">Urządzenia są pobierane z MQTT w czasie rzeczywistym</span>
+                                    <span className="form-hint">Devices are fetched from MQTT in real-time</span>
                                 </div>
 
                                 <div className="form-group form-group-full">
-                                    <label className="form-label">Docelowa wartość (np. temperatura)</label>
+                                    <label className="form-label">Target value (e.g. temperature)</label>
                                     <input
                                         type="number"
                                         step="0.1"
                                         value={formData.target_value}
                                         onChange={(e) => setFormData({ ...formData, target_value: e.target.value })}
-                                        placeholder="np. 21.5"
+                                        placeholder="e.g. 21.5"
                                         className="form-input"
                                     />
-                                    <span className="form-hint">Temperatura lub inny parametr docelowy dla urządzenia</span>
+                                    <span className="form-hint">Temperature or other target parameter for the device</span>
                                 </div>
                             </div>
 
                             <div className="form-actions">
                                 <button type="button" onClick={() => setShowAddModal(false)} className="btn-secondary">
-                                    Anuluj
+                                    Cancel
                                 </button>
                                 <button type="submit" className="btn-primary">
-                                    Dodaj preferencję
+                                    Add preference
                                 </button>
                             </div>
                         </form>
@@ -222,11 +222,11 @@ const PreferenceManager = ({ notification, setNotification, userRole, userId, re
             )}
 
             <div className="preferences-list-section">
-                <h4>{isAdmin ? 'Wszystkie preferencje' : 'Moje preferencje'} ({displayPreferences.length})</h4>
+                <h4>{isAdmin ? 'All preferences' : 'My preferences'} ({displayPreferences.length})</h4>
                 {loading ? (
-                    <div className="loading-message">Ładowanie preferencji...</div>
+                    <div className="loading-message">Loading preferences...</div>
                 ) : displayPreferences.length === 0 ? (
-                    <div className="empty-message">Brak preferencji. Dodaj nową aby zacząć.</div>
+                    <div className="empty-message">No preferences found. Add a new one to start.</div>
                 ) : (
                     displayPreferences.map(pref => (
                         <div key={pref.id} className="preference-card">
@@ -235,14 +235,14 @@ const PreferenceManager = ({ notification, setNotification, userRole, userId, re
                                 <div className="pref-actions">
                                     {userRole === 'building_admin' && (
                                         <>
-                                            <button className="btn-ghost-edit" title="Edytuj">
+                                            <button className="btn-ghost-edit" title="Edit">
                                                 <Edit2 size={16} />
                                             </button>
                                             <button
                                                 onClick={() => handleDeletePreference(pref.id)}
                                                 disabled={deletingId === pref.id}
                                                 className="btn-ghost-danger"
-                                                title="Usuń"
+                                                title="Delete"
                                             >
                                                 <Trash2 size={16} />
                                             </button>
@@ -251,8 +251,8 @@ const PreferenceManager = ({ notification, setNotification, userRole, userId, re
                                 </div>
                             </div>
                             <div className="pref-info">
-                                <p><span className="info-label">Docelowa wartość:</span> {pref.target_value || '-'}</p>
-                                <p><span className="info-label">Harmonogram:</span> {Object.keys(pref.schedule).length > 0 ? 'Ustawiony' : 'Brak'}</p>
+                                <p><span className="info-label">Target value:</span> {pref.target_value || '-'}</p>
+                                <p><span className="info-label">Schedule:</span> {Object.keys(pref.schedule).length > 0 ? 'Set' : 'None'}</p>
                             </div>
                         </div>
                     ))

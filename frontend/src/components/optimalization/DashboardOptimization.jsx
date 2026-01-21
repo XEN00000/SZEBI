@@ -57,7 +57,7 @@ const DashboardOptimization = ({ refreshKey }) => {
                 const logsList = Array.isArray(logsData) ? logsData : logsData.results || [];
                 recentOptimizations = logsList.filter(l => l.status === 'success').length;
             }
-            
+
             setStats({
                 total_devices: devicesList.length,
                 active_preferences: activePreferences,
@@ -66,7 +66,7 @@ const DashboardOptimization = ({ refreshKey }) => {
             setError(null);
         } catch (err) {
             console.error('Error fetching dashboard data:', err);
-            setError('Nie udało się pobrać danych.');
+            setError('Failed to fetch data.');
         } finally {
             setLoading(false);
         }
@@ -77,14 +77,14 @@ const DashboardOptimization = ({ refreshKey }) => {
             <div className="dashboard-header">
                 <h2 className="dashboard-title">
                     <TrendingUp size={24} />
-                    Przegląd Optymalizacji
+                    Optimization Overview
                 </h2>
-                <button 
+                <button
                     onClick={fetchDashboardData}
                     className="btn-refresh"
                     disabled={loading}
                 >
-                    {loading ? 'Ładowanie...' : 'Odśwież'}
+                    {loading ? 'Loading...' : 'Refresh'}
                 </button>
             </div>
 
@@ -101,7 +101,7 @@ const DashboardOptimization = ({ refreshKey }) => {
                         <Zap size={24} />
                     </div>
                     <div className="stat-content">
-                        <p className="stat-label">Urządzenia aktywne</p>
+                        <p className="stat-label">Active Devices</p>
                         <p className="stat-value">{devices.length}</p>
                     </div>
                 </div>
@@ -111,7 +111,7 @@ const DashboardOptimization = ({ refreshKey }) => {
                         <Activity size={24} />
                     </div>
                     <div className="stat-content">
-                        <p className="stat-label">Aktywne preferencje</p>
+                        <p className="stat-label">Active Preferences</p>
                         <p className="stat-value">{stats.active_preferences}</p>
                     </div>
                 </div>
@@ -121,18 +121,18 @@ const DashboardOptimization = ({ refreshKey }) => {
                         <TrendingUp size={24} />
                     </div>
                     <div className="stat-content">
-                        <p className="stat-label">Ostatnie optymalizacje</p>
+                        <p className="stat-label">Recent Optimizations</p>
                         <p className="stat-value">{stats.recent_optimizations}</p>
                     </div>
                 </div>
             </div>
 
             <div className="devices-section-opt">
-                <h3 className="section-title">Urządzenia</h3>
+                <h3 className="section-title">Devices</h3>
                 {loading ? (
-                    <div className="loading-message">Ładowanie urządzeń...</div>
+                    <div className="loading-message">Loading devices...</div>
                 ) : devices.length === 0 ? (
-                    <div className="empty-message">Brak dostępnych urządzeń</div>
+                    <div className="empty-message">No available devices</div>
                 ) : (
                     <div className="devices-grid-opt">
                         {devices.map((device) => (
@@ -140,12 +140,12 @@ const DashboardOptimization = ({ refreshKey }) => {
                                 <div className="device-header-opt">
                                     <h4 className="device-name">{device.name}</h4>
                                     <span className={`device-status ${device.is_active ? 'status-active' : 'status-inactive'}`}>
-                                        {device.is_active ? 'Aktywne' : 'Nieaktywne'}
+                                        {device.is_active ? 'Active' : 'Inactive'}
                                     </span>
                                 </div>
                                 <div className="device-info-opt">
-                                    <p><span className="info-label">Typ:</span> {device.device_type}</p>
-                                    <p><span className="info-label">Moc nominalna:</span> {device.nominal_power} W</p>
+                                    <p><span className="info-label">Type:</span> {device.device_type}</p>
+                                    <p><span className="info-label">Nominal power:</span> {device.nominal_power} W</p>
                                 </div>
                             </div>
                         ))}

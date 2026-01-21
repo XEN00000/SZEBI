@@ -14,9 +14,9 @@ const SimulationPage = () => {
         <div className="acquisition-container">
             <div className="acquisition-content">
                 <div className="header-section">
-                    <h1 className="page-title">Moduł Symulacji</h1>
-                    <p className="page-subtitle">Zarządzanie wirtualnymi urządzeniami i scenariuszami testowymi</p>
-                    
+                    <h1 className="page-title">Simulation Module</h1>
+                    <p className="page-subtitle">Managing virtual devices and test scenarios</p>
+
                     <DashboardSimulation refreshKey={refreshKey} />
                 </div>
 
