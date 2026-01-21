@@ -1,13 +1,21 @@
 from __future__ import annotations
 import math
 from numpy import random
+
+from simulation.logic.src.base.simulation import Simulation
 from simulation.logic.src.base.weather import Weather
+from simulation.logic.src.base.weatherTypes.outsideWeather import OutsideWeather
 
 
 class InsideWeather(Weather):
-    def __init__(self, simulation):
-        super().__init__(simulation)
+    def __init__(self, name:str, simulation: Simulation, outsideWeather: OutsideWeather):
+        super().__init__(name, simulation)
 
+        if outsideWeather is None:
+            raise ValueError("OutsideWeather must be provided")
+        
+        self.outsideWeather = outsideWeather
+        
         self.sunlight: float = 0.0
         self.brightness: float = 0.0
         self.cloudiness: float = 1
@@ -16,7 +24,9 @@ class InsideWeather(Weather):
         self.temperature: float = 22.0
         self.rainfall: float = 0.0
 
-        self.isolation: float = 0.80
+        self.isolation: float = 0.95
+        self.transfer_rate: float = 1.5
+
         self.curr_lighting_power = 0.0
         self.curr_heating_power = 0.0
         self.celsius_per_kwh = 0.35
@@ -43,8 +53,14 @@ class InsideWeather(Weather):
     def update_wind(self, millis: int) -> None:
         pass
 
-    # do poprawy bo dom bedzie mial chyba z 10000 stopni
     def update_temperature(self, millis: int) -> None:
-        SPEED_OF_CHILLING = 0.5
-        self.temperature -= (SPEED_OF_CHILLING * self.isolation / (60 * 60 * 1000)) * millis
-        self.temperature += self.curr_heating_power * (millis / 3600) * self.celsius_per_kwh
+        outside_temp = self.outsideWeather.temperature
+
+        hours_passed = millis / 3600000.0
+        exchange_factor = (1.0 - self.isolation) * self.transfer_rate
+        temp_diff = outside_temp - self.temperature
+
+        self.temperature += temp_diff * exchange_factor * hours_passed
+
+        energy_kwh = (self.curr_heating_power / 1000.0) * hours_passed
+        self.temperature += energy_kwh * self.celsius_per_kwh # maybe necessary to split into heating_celcius_per_kwh and cooling_celcius_per_kwh

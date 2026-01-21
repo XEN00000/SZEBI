@@ -131,18 +131,23 @@ class DatabaseManager:
         batch = []
         batch_size = 50
         while True:
-            measurement = self._measurement_queue.get()
-            if measurement is None:  # sentinel do zamknięcia
-                break
-            batch.append(measurement)
+            try:
+                # Timeout 1s to allow periodic flushing
+                measurement = self._measurement_queue.get(timeout=1.0)
+                if measurement is None:  # sentinel do zamknięcia
+                    break
+                batch.append(measurement)
+                self._measurement_queue.task_done()
+            except queue.Empty:
+                pass  # Continue to check if we need to flush
 
-            if len(batch) >= batch_size:
+            if len(batch) >= batch_size or (batch and self._measurement_queue.empty()):
                 try:
                     Measurement.objects.bulk_create(batch)
+                    # print(f"DEBUG DB: Flushed {len(batch)} measurements")
                 except Exception as e:
                     print(f"DB ERROR przy bulk_create: {e}")
                 batch.clear()
-            self._measurement_queue.task_done()
 
         # zapis pozostałych elementów po zamknięciu kolejki
         if batch:
@@ -160,18 +165,21 @@ class DatabaseManager:
         batch = []
         batch_size = 50
         while True:
-            log = self._log_queue.get()
-            if log is None:
-                break
-            batch.append(log)
-            if len(batch) >= batch_size:
+            try:
+                log = self._log_queue.get(timeout=1.0)
+                if log is None:
+                    break
+                batch.append(log)
+                self._log_queue.task_done()
+            except queue.Empty:
+                pass
+
+            if len(batch) >= batch_size or (batch and self._log_queue.empty()):
                 try:
                     DataLog.objects.bulk_create(batch)
                 except Exception as e:
                     print(f"DB ERROR przy bulk_create DataLog: {e}")
                 batch.clear()
-
-            self._log_queue.task_done()
 
         if batch:
             try:
