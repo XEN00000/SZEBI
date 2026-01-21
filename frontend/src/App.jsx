@@ -51,7 +51,7 @@ function App() {
             <Route path="optimization" element={<OptimalizationPage userRole={user?.role} userId={user?.id} />} />
           </Route>
 
-          <Route path="*" element={<div className="p-8 text-center text-gray-400">404 - Strona nie odnaleziona</div>} />
+          <Route path="*" element={<div className="p-8 text-center text-gray-400">404 - Page not found</div>} />
         </Route>
       </Routes>
     </Router>

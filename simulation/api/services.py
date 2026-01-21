@@ -33,12 +33,15 @@ def _build_weather_map(sim_cfg, sim):
 
 def load_simulation(sim_cfg: SimulationConfig) -> Simulation:
     if sim_cfg.id in _simulation_runtime:
+        print(f"SIMULATION: Returning cached '{sim_cfg.name}'")
         return _simulation_runtime[sim_cfg.id]
 
     sim = Simulation(sim_cfg.name)
     weather_map = _build_weather_map(sim_cfg, sim)
+    # CRITICAL FIX: Load time configuration from database
     sim.base_millis_per_tick = sim_cfg.base_millis_per_tick
     sim.simulated_millis_per_tick = sim_cfg.simulated_millis_per_tick
+    print(f"SIMULATION: Created '{sim_cfg.name}' with speed {sim_cfg.base_millis_per_tick / sim_cfg.simulated_millis_per_tick:.0f}x (1 hour in {sim_cfg.simulated_millis_per_tick / 1000:.0f}s)")
     for dcfg in sim_cfg.devices.all():
         print(dcfg.name, dcfg.type)
         weather = weather_map.get(str(dcfg.weather_ref.id))

@@ -1,5 +1,5 @@
 from django.test import TestCase
-from simulation.models import Device
+from simulation.api.models import DeviceConfig
 from optimization.models import OptimizationRule, UserPreference
 from optimization.logic.algorithm import calculate_optimal_settings
 
@@ -11,7 +11,7 @@ class AlgorithmTestCase(TestCase):
 
     def setUp(self):
         # Tworzymy urządzenie, na którym będziemy testować
-        self.device = Device.objects.create(
+        self.device = DeviceConfig.objects.create(
             name="Test Heater",
             device_type="CONSUMER",
             nominal_power=2.0,

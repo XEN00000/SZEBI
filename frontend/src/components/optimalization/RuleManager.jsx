@@ -24,7 +24,7 @@ const RuleManager = ({ onAddClick, onRefresh, notification, setNotification, use
             setRules(rulesList.sort((a, b) => b.priority - a.priority));
         } catch (error) {
             console.error('Error fetching rules:', error);
-            setNotification({ type: 'error', message: 'Nie udało się pobrać reguł.' });
+            setNotification({ type: 'error', message: 'Failed to fetch rules.' });
         } finally {
             setLoading(false);
             setTimeout(() => setNotification(null), 4000);
@@ -36,7 +36,7 @@ const RuleManager = ({ onAddClick, onRefresh, notification, setNotification, use
     }, [refreshKey, fetchRules]);
 
     const handleDelete = async (ruleId) => {
-        const confirmed = window.confirm('Czy na pewno chcesz usunąć tę regułę?');
+        const confirmed = window.confirm('Are you sure you want to delete this rule?');
         if (!confirmed) return;
 
         setDeletingId(ruleId);
@@ -53,11 +53,11 @@ const RuleManager = ({ onAddClick, onRefresh, notification, setNotification, use
 
             if (!response.ok) throw new Error('Failed to delete rule');
 
-            setNotification({ type: 'success', message: 'Reguła usunięta.' });
+            setNotification({ type: 'success', message: 'Rule deleted.' });
             fetchRules();
         } catch (error) {
             console.error('Error deleting rule:', error);
-            setNotification({ type: 'error', message: 'Nie udało się usunąć reguły.' });
+            setNotification({ type: 'error', message: 'Failed to delete rule.' });
         } finally {
             setDeletingId(null);
             setTimeout(() => setNotification(null), 4000);
@@ -82,14 +82,14 @@ const RuleManager = ({ onAddClick, onRefresh, notification, setNotification, use
 
             if (!response.ok) throw new Error('Failed to update rule');
 
-            setNotification({ 
-                type: 'success', 
-                message: `Reguła ${!rule.is_active ? 'aktywowana' : 'dezaktywowana'}.` 
+            setNotification({
+                type: 'success',
+                message: `Rule ${!rule.is_active ? 'activated' : 'deactivated'}.`
             });
             fetchRules();
         } catch (error) {
             console.error('Error updating rule:', error);
-            setNotification({ type: 'error', message: 'Nie udało się zaktualizować reguły.' });
+            setNotification({ type: 'error', message: 'Failed to update rule.' });
         }
         setTimeout(() => setNotification(null), 4000);
     };
@@ -100,13 +100,13 @@ const RuleManager = ({ onAddClick, onRefresh, notification, setNotification, use
         <div className="rules-card">
             <div className="rules-card-header">
                 <div>
-                    <h3>Zarządzanie regułami optymalizacji</h3>
-                    {!isAdmin && <p className="role-notice"><Lock size={14} /> Tylko administrator może modyfikować reguły</p>}
+                    <h3>Optimization Rules Management</h3>
+                    {!isAdmin && <p className="role-notice"><Lock size={14} /> Only administrator can modify rules</p>}
                 </div>
                 {isAdmin && (
                     <button onClick={onAddClick} className="btn-add-rule">
                         <Plus size={18} />
-                        Dodaj regułę
+                        Add rule
                     </button>
                 )}
             </div>
@@ -115,22 +115,22 @@ const RuleManager = ({ onAddClick, onRefresh, notification, setNotification, use
                 <table className="rules-table">
                     <thead>
                         <tr>
-                            <th>Nazwa</th>
-                            <th>Warunki</th>
-                            <th>Akcja</th>
-                            <th>Priorytet</th>
+                            <th>Name</th>
+                            <th>Conditions</th>
+                            <th>Action</th>
+                            <th>Priority</th>
                             <th>Status</th>
-                            <th>Akcje</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {loading ? (
                             <tr>
-                                <td colSpan="6" className="table-empty">Ładowanie reguł...</td>
+                                <td colSpan="6" className="table-empty">Loading rules...</td>
                             </tr>
                         ) : rules.length === 0 ? (
                             <tr>
-                                <td colSpan="6" className="table-empty">Brak reguł. Dodaj nową regułę aby zacząć.</td>
+                                <td colSpan="6" className="table-empty">No rules found. Add a new rule to start.</td>
                             </tr>
                         ) : (
                             rules.map(rule => (
@@ -146,7 +146,7 @@ const RuleManager = ({ onAddClick, onRefresh, notification, setNotification, use
                                                 ))}
                                             </div>
                                         ) : (
-                                            <span className="empty-value">Brak warunków</span>
+                                            <span className="empty-value">No conditions</span>
                                         )}
                                     </td>
                                     <td>{rule.action}</td>
@@ -159,11 +159,11 @@ const RuleManager = ({ onAddClick, onRefresh, notification, setNotification, use
                                                 onClick={() => toggleActive(rule)}
                                                 className={`status-toggle ${rule.is_active ? 'active' : 'inactive'}`}
                                             >
-                                                {rule.is_active ? 'Aktywna' : 'Nieaktywna'}
+                                                {rule.is_active ? 'Active' : 'Inactive'}
                                             </button>
                                         ) : (
                                             <span className={`status-label ${rule.is_active ? 'active' : 'inactive'}`}>
-                                                {rule.is_active ? 'Aktywna' : 'Nieaktywna'}
+                                                {rule.is_active ? 'Active' : 'Inactive'}
                                             </span>
                                         )}
                                     </td>
@@ -171,9 +171,9 @@ const RuleManager = ({ onAddClick, onRefresh, notification, setNotification, use
                                         <div className="table-actions">
                                             {isAdmin && (
                                                 <>
-                                                    <button 
+                                                    <button
                                                         onClick={() => onEditClick(rule)}
-                                                        className="btn-ghost-edit" 
+                                                        className="btn-ghost-edit"
                                                         title="Edytuj"
                                                     >
                                                         <Edit2 size={16} />

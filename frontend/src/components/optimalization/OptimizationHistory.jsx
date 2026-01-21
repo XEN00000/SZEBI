@@ -48,16 +48,16 @@ const OptimizationHistory = ({ notification, setNotification, userRole, refreshK
 
             if (!response.ok) throw new Error('Failed to run optimization');
             const data = await response.json();
-            setNotification({ 
-                type: 'success', 
-                message: 'Cykl optymalizacji uruchomiony pomyślnie.' 
+            setNotification({
+                type: 'success',
+                message: 'Optimization cycle started successfully.'
             });
-            
+
             // Pobierz zaktualizowaną historię
             setTimeout(() => fetchHistory(), 1000);
         } catch (error) {
             console.error('Error running optimization:', error);
-            setNotification({ type: 'error', message: 'Nie udało się uruchomić optymalizacji.' });
+            setNotification({ type: 'error', message: 'Failed to start optimization.' });
         } finally {
             setRunning(false);
             setTimeout(() => setNotification(null), 4000);
@@ -82,14 +82,14 @@ const OptimizationHistory = ({ notification, setNotification, userRole, refreshK
             <div className="history-header">
                 <h3>
                     <BarChart3 size={20} />
-                    Kontrola optymalizacji
+                    Optimization Control
                 </h3>
             </div>
 
             {!isAdmin && (
                 <div className="admin-only-notice">
                     <Lock size={16} />
-                    <span>Tylko administrator może uruchomić cykl optymalizacji</span>
+                    <span>Only administrator can run optimization cycle</span>
                 </div>
             )}
 
@@ -98,20 +98,20 @@ const OptimizationHistory = ({ notification, setNotification, userRole, refreshK
                     onClick={runOptimization}
                     disabled={running || !isAdmin}
                     className="btn-run-optimization"
-                    title={!isAdmin ? "Tylko administrator może uruchomić optymalizację" : ""}
+                    title={!isAdmin ? "Only administrator can run optimization cycle" : ""}
                 >
                     <Activity size={18} />
-                    {running ? 'Uruchamianie...' : 'Uruchom cykl optymalizacji'}
+                    {running ? 'Starting...' : 'Run optimization cycle'}
                 </button>
-                <p className="control-hint">{isAdmin ? 'Ręcznie uruchom cykl optymalizacji teraz' : 'Kontakt z administratorem wymagany'}</p>
+                <p className="control-hint">{isAdmin ? 'Manually run optimization cycle now' : 'Administrator contact required'}</p>
             </div>
 
             <div className="history-section">
-                <h4>Historia operacji ({history.length})</h4>
+                <h4>Operation history ({history.length})</h4>
                 {loading ? (
-                    <div className="loading-message">Ładowanie historii...</div>
+                    <div className="loading-message">Loading history...</div>
                 ) : history.length === 0 ? (
-                    <div className="empty-message">Brak historii. Uruchom cykl aby zobaczyć wyniki.</div>
+                    <div className="empty-message">No history. Run cycle to see results.</div>
                 ) : (
                     <div className="history-list">
                         {history.slice(0, 10).map((entry, idx) => (
@@ -124,7 +124,7 @@ const OptimizationHistory = ({ notification, setNotification, userRole, refreshK
                                     <div className="history-action">{entry.action}</div>
                                     <div className="history-message">{entry.message}</div>
                                     {entry.affected_devices_count > 0 && (
-                                        <div className="history-devices">Dotyczyło {entry.affected_devices_count} urządzeń</div>
+                                        <div className="history-devices">Affected {entry.affected_devices_count} devices</div>
                                     )}
                                 </div>
                                 <div className="history-time">{formatDate(entry.timestamp)}</div>

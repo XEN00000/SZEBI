@@ -35,11 +35,16 @@ class HandleData:
                 return None
 
             # Weather: szebi/weather/<uuid>/<metryka>
-            elif topic.startswith("szebi/weather/") or topic.startswith("szebi/device/state/"):
+            if topic.startswith("szebi/weather/") or topic.startswith("szebi/device/state/"):
                 parts = topic.split("/")
                 if len(parts) < 4:
                     return None
-                env_uuid = parts[2]  # uuid pogody lub urządzenia
+                
+                if topic.startswith("szebi/device/state/"):
+                     env_uuid = parts[3]
+                else: 
+                     env_uuid = parts[2]  # uuid pogody
+
                 metric_name = data.get("metric_name") or "is_active"
             else:
                 self._log_error(f"Nieznany topic: {topic}", level=DataLogLevel.WARNING, raw_message=raw_message)
@@ -169,8 +174,12 @@ class HandleData:
         if raw_message:
             full_message += f" | raw: {raw_message}"
 
+        # Tylko linkuj measurement jeśli został zapisany (ma pk)
+        # W przeciwnym razie None (np. gdy został pominięty przez ignore_conflicts)
+        measurement_ref = measurement if (measurement and measurement.pk) else None
+
         self.db_manager.insert_data_log(DataLog(
-            measurement=measurement,
+            measurement=measurement_ref,
             level=level,
             message=full_message[:255]
         ))

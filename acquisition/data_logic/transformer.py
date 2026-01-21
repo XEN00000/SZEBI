@@ -54,8 +54,10 @@ class Transformer:
         return measurement
 
     def _log(self, message: str, level: str, measurement: Measurement):
+        # Only link measurement if it has been saved (has pk)
+        measurement_ref = measurement if (measurement and measurement.pk) else None
         self.db_manager.insert_data_log(DataLog(
-            measurement=measurement,
+            measurement=measurement_ref,
             level=level,
             message=message[:255]
         ))

@@ -3,10 +3,10 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import { Menu, X, Rocket, Zap, BarChart, Database, TrendingUp, Play, LogOut } from 'lucide-react';
 
 const ROLES = {
-  ADMIN: 'building_admin',
-  WORKER: 'worker',
-  MAINTENANCE: 'maintenance_engineer',
-  PROVIDER: 'energy_provider'
+    ADMIN: 'building_admin',
+    WORKER: 'worker',
+    MAINTENANCE: 'maintenance_engineer',
+    PROVIDER: 'energy_provider'
 };
 
 const Layout = ({ user, onLogout }) => {
@@ -14,41 +14,41 @@ const Layout = ({ user, onLogout }) => {
     const location = useLocation();
 
     const navItems = [
-        { 
-            name: 'Optimization', 
-            path: '/optimization', 
-            icon: Rocket, 
-            allowedRoles: [ROLES.ADMIN, ROLES.MAINTENANCE, ROLES.WORKER] 
+        {
+            name: 'Optimization',
+            path: '/optimization',
+            icon: Rocket,
+            allowedRoles: [ROLES.ADMIN, ROLES.MAINTENANCE, ROLES.WORKER]
         },
-        { 
-            name: 'Alarms', 
-            path: '/alarms', 
-            icon: Zap, 
-            allowedRoles: [ROLES.ADMIN, ROLES.MAINTENANCE] 
+        {
+            name: 'Alarms',
+            path: '/alarms',
+            icon: Zap,
+            allowedRoles: [ROLES.ADMIN, ROLES.MAINTENANCE]
         },
-        { 
-            name: 'Analysis', 
-            path: '/analysis', 
-            icon: BarChart, 
-            allowedRoles: [ROLES.ADMIN, ROLES.MAINTENANCE] 
+        {
+            name: 'Analysis',
+            path: '/analysis',
+            icon: BarChart,
+            allowedRoles: [ROLES.ADMIN, ROLES.MAINTENANCE]
         },
-        { 
-            name: 'Acquisition', 
-            path: '/acquisition', 
-            icon: Database, 
-            allowedRoles: [ROLES.ADMIN, ROLES.MAINTENANCE] 
+        {
+            name: 'Acquisition',
+            path: '/acquisition',
+            icon: Database,
+            allowedRoles: [ROLES.ADMIN, ROLES.MAINTENANCE]
         },
-        { 
-            name: 'Forecasting', 
-            path: '/forecasting', 
-            icon: TrendingUp, 
-            allowedRoles: [ROLES.ADMIN, ROLES.MAINTENANCE] 
+        {
+            name: 'Forecasting',
+            path: '/forecasting',
+            icon: TrendingUp,
+            allowedRoles: [ROLES.ADMIN, ROLES.MAINTENANCE]
         },
-        { 
-            name: 'Simulation', 
-            path: '/simulation', 
-            icon: Play, 
-            allowedRoles: [ROLES.ADMIN, ROLES.PROVIDER] 
+        {
+            name: 'Simulation',
+            path: '/simulation',
+            icon: Play,
+            allowedRoles: [ROLES.ADMIN, ROLES.PROVIDER]
         },
     ];
 
@@ -63,7 +63,7 @@ const Layout = ({ user, onLogout }) => {
                             <div className="logo-icon"><span>S</span></div>
                             <span className="logo-text">SZEBI</span>
                         </Link>
-                        
+
                         <div className="hidden md:flex items-center ml-4 gap-2">
                             <div className="px-3 py-1 bg-gray-800 rounded-full text-[10px] text-gray-400">
                                 <span className="text-emerald-400 ml-1 font-mono">{user?.username} ({user?.role})</span>
@@ -95,8 +95,8 @@ const Layout = ({ user, onLogout }) => {
                                 </Link>
                             );
                         })}
-                        
-                        <button 
+
+                        <button
                             onClick={() => {
                                 setIsMenuOpen(false);
                                 onLogout();
@@ -104,12 +104,12 @@ const Layout = ({ user, onLogout }) => {
                             className="nav-logout-btn"
                         >
                             <LogOut size={16} />
-                            <span>Wyloguj się</span>
+                            <span>Logout</span>
                         </button>
                     </div>
                 </div>
             </nav>
-            
+
             <main className="main-content">
                 <div className="content-wrapper">
                     <Outlet />
@@ -119,7 +119,7 @@ const Layout = ({ user, onLogout }) => {
             <footer className="footer">
                 <div className="footer-content">
                     <div className="footer-left">
-                        © 2026 SZEBI Project. System Zarządzania Energią Budynków Inteligentnych.
+                        © 2026 SZEBI Project. Intelligent Building Energy Management System.
                     </div>
                 </div>
             </footer>

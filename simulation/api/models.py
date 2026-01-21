@@ -4,8 +4,10 @@ import uuid
 class SimulationConfig(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=100, unique=True)
-    base_millis_per_tick = models.PositiveIntegerField(default=60 * 60 * 1000)
-    simulated_millis_per_tick = models.PositiveIntegerField(default=5* 1000)
+    # Default: 1 minute simulated time per tick, processed every 100ms real-time
+    # This gives 600x speedup: 1 minute in 100ms, 1 hour in 6 seconds
+    base_millis_per_tick = models.PositiveIntegerField(default=60 * 100)  # 1 minute
+    simulated_millis_per_tick = models.PositiveIntegerField(default=100)  # 100ms real-time
     consumption_mode = models.CharField(max_length=50, default="normal")
     charging_mode = models.CharField(max_length=50, default="balanced")
     created_at = models.DateTimeField(auto_now_add=True)

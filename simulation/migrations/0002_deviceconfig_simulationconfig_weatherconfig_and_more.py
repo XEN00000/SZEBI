@@ -8,7 +8,6 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('optimization', '0002_remove_userpreference_device_and_more'),
         ('simulation', '0001_initial'),
     ]
 
@@ -41,9 +40,6 @@ class Migration(migrations.Migration):
                 ('extra', models.JSONField(blank=True, default=dict)),
                 ('simulation', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='weathers', to='simulation.simulationconfig')),
             ],
-        ),
-        migrations.DeleteModel(
-            name='Device',
         ),
         migrations.DeleteModel(
             name='EnergyTariff',

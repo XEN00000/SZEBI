@@ -130,7 +130,7 @@ def _acquisition_loop():
 
         # Konfiguracja MQTT
         broker_host = os.getenv('MQTT_BROKER_HOST', 'localhost')
-        mqtt_manager = MQTTManager(broker_url=broker_host, topics=["environment/#"])
+        mqtt_manager = MQTTManager(broker_url=broker_host, topics=["szebi/#"])
 
         if not mqtt_manager.connect():
             print("WORKER ERROR: Nie udało się połączyć z MQTT.")

@@ -77,7 +77,7 @@ const AddRuleModal = ({ isOpen, onClose, onSubmit, loading, editingRule = null }
 
     const addCondition = () => {
         if (!newCondition.field.trim()) {
-            alert('Podaj pole warunku');
+            alert('Enter condition field');
             return;
         }
         setFormData(prev => ({
@@ -97,7 +97,7 @@ const AddRuleModal = ({ isOpen, onClose, onSubmit, loading, editingRule = null }
     const handleSubmit = (e) => {
         e.preventDefault();
         if (formData.conditions.length === 0) {
-            alert('Dodaj co najmniej jeden warunek');
+            alert('Add at least one condition');
             return;
         }
         onSubmit(formData);
@@ -117,7 +117,7 @@ const AddRuleModal = ({ isOpen, onClose, onSubmit, loading, editingRule = null }
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal-container" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
-                    <h2 className="modal-title">{editingRule ? 'Edytuj regułę' : 'Dodaj nową regułę'}</h2>
+                    <h2 className="modal-title">{editingRule ? 'Edit Rule' : 'Add New Rule'}</h2>
                     <button onClick={onClose} className="modal-close">
                         <X size={20} />
                     </button>
@@ -127,23 +127,23 @@ const AddRuleModal = ({ isOpen, onClose, onSubmit, loading, editingRule = null }
                     <div className="form-grid">
                         <div className="form-group form-group-full">
                             <label className="form-label">
-                                Nazwa reguły <span className="required">*</span>
+                                Rule Name <span className="required">*</span>
                             </label>
                             <input
                                 type="text"
                                 name="name"
                                 value={formData.name}
                                 onChange={handleChange}
-                                placeholder="np. Wymuszenie oszczędzania w szczycie"
+                                placeholder="e.g. Force saving in peak"
                                 className="form-input"
                                 required
                             />
-                            <span className="form-hint">Opisowa nazwa reguły optymalizacji</span>
+                            <span className="form-hint">Descriptive name of optimization rule</span>
                         </div>
 
                         <div className="form-group form-group-full">
                             <label className="form-label">
-                                Warunki <span className="required">*</span>
+                                Conditions <span className="required">*</span>
                             </label>
                             <div className="conditions-list">
                                 {formData.conditions.length > 0 && (
@@ -155,7 +155,7 @@ const AddRuleModal = ({ isOpen, onClose, onSubmit, loading, editingRule = null }
                                                     type="button"
                                                     onClick={() => removeCondition(idx)}
                                                     className="condition-remove"
-                                                    title="Usuń warunek"
+                                                    title="Remove condition"
                                                 >
                                                     <Trash2 size={14} />
                                                 </button>
@@ -170,7 +170,7 @@ const AddRuleModal = ({ isOpen, onClose, onSubmit, loading, editingRule = null }
                                         onChange={handleConditionChange}
                                         className="form-select form-input-sm"
                                     >
-                                        <option value="">Wybierz pole...</option>
+                                        <option value="">Select field...</option>
                                         {availableConditions.map(cond => (
                                             <option key={cond.value} value={cond.value}>
                                                 {cond.label}
@@ -195,7 +195,7 @@ const AddRuleModal = ({ isOpen, onClose, onSubmit, loading, editingRule = null }
                                         name="value"
                                         value={newCondition.value}
                                         onChange={handleConditionChange}
-                                        placeholder="wartość"
+                                        placeholder="value"
                                         className="form-input form-input-sm"
                                     />
                                     <button
@@ -203,16 +203,16 @@ const AddRuleModal = ({ isOpen, onClose, onSubmit, loading, editingRule = null }
                                         onClick={addCondition}
                                         className="btn-add-condition"
                                     >
-                                        <Plus size={16} /> Dodaj
+                                        <Plus size={16} /> Add
                                     </button>
                                 </div>
                             </div>
-                            <span className="form-hint">Dodaj warunki które muszą być spełnione dla aktywacji reguły</span>
+                            <span className="form-hint">Add conditions that must be met for rule activation</span>
                         </div>
 
                         <div className="form-group form-group-full">
                             <label className="form-label">
-                                Akcja <span className="required">*</span>
+                                Action <span className="required">*</span>
                             </label>
                             <select
                                 name="action"
@@ -221,14 +221,14 @@ const AddRuleModal = ({ isOpen, onClose, onSubmit, loading, editingRule = null }
                                 className="form-select"
                                 required
                             >
-                                <option value="">Wybierz akcję...</option>
+                                <option value="">Select action...</option>
                                 {availableActions.map(action => (
                                     <option key={action.value} value={action.value}>
                                         {action.label} - {action.description}
                                     </option>
                                 ))}
                             </select>
-                            <span className="form-hint">Wybierz akcję która będzie wykonana gdy wszystkie warunki będą spełnione</span>
+                            <span className="form-hint">Select action to be executed when all conditions are met</span>
                         </div>
 
                         <div className="form-group">
@@ -242,7 +242,7 @@ const AddRuleModal = ({ isOpen, onClose, onSubmit, loading, editingRule = null }
                                 max="100"
                                 className="form-input"
                             />
-                            <span className="form-hint">Wyższy numer = ważniejsza reguła</span>
+                            <span className="form-hint">Higher number = more important rule</span>
                         </div>
 
                         <div className="form-group">
@@ -253,17 +253,17 @@ const AddRuleModal = ({ isOpen, onClose, onSubmit, loading, editingRule = null }
                                     checked={formData.is_active}
                                     onChange={handleChange}
                                 />
-                                {' '}Aktywna
+                                {' '}Active
                             </label>
                         </div>
                     </div>
 
                     <div className="form-actions">
                         <button type="button" onClick={onClose} className="btn-secondary">
-                            Anuluj
+                            Cancel
                         </button>
                         <button type="submit" className="btn-primary" disabled={loading}>
-                            {loading ? (editingRule ? 'Aktualizowanie...' : 'Dodawanie...') : (editingRule ? 'Zaktualizuj regułę' : 'Dodaj regułę')}
+                            {loading ? (editingRule ? 'Updating...' : 'Adding...') : (editingRule ? 'Update Rule' : 'Add Rule')}
                         </button>
                     </div>
                 </form>

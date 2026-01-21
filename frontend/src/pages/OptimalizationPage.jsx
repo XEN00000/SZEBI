@@ -1,5 +1,4 @@
 import React, { useState, useCallback } from 'react';
-import { Zap } from 'lucide-react';
 import DashboardOptimization from '../components/optimalization/DashboardOptimization';
 import RuleManager from '../components/optimalization/RuleManager';
 import PreferenceManager from '../components/optimalization/PreferenceManager';
@@ -23,7 +22,7 @@ const OptimalizationPage = ({ userRole, userId }) => {
             const csrftoken = getCookie('csrftoken');
             const method = editingRule ? 'PATCH' : 'POST';
             const url = editingRule ? `${API_BASE_URL}/api/optimization/rules/${editingRule.id}/` : `${API_BASE_URL}/api/optimization/rules/`;
-            
+
             const response = await fetch(url, {
                 method: method,
                 credentials: 'include',
@@ -36,14 +35,14 @@ const OptimalizationPage = ({ userRole, userId }) => {
 
             if (!response.ok) throw new Error('Failed to save rule');
 
-            const message = editingRule ? 'Reguła zaktualizowana pomyślnie.' : 'Reguła dodana pomyślnie.';
+            const message = editingRule ? 'Rule updated successfully.' : 'Rule added successfully.';
             setNotification({ type: 'success', message });
             setShowAddRuleModal(false);
             setEditingRule(null);
             setRefreshKey(prev => prev + 1);
         } catch (error) {
             console.error('Error saving rule:', error);
-            const message = editingRule ? 'Nie udało się zaktualizować reguły.' : 'Nie udało się dodać reguły.';
+            const message = editingRule ? 'Failed to update rule.' : 'Failed to add rule.';
             setNotification({ type: 'error', message });
         } finally {
             setAddingRule(false);
@@ -65,23 +64,16 @@ const OptimalizationPage = ({ userRole, userId }) => {
     }, []);
 
     return (
-        <div className="optimization-page">
+        <div className="acquisition-container">
             <div className="optimization-content">
                 {/* Page Header */}
-                <div className="page-header">
-                    <div className="page-header-content">
-                        <div className="page-header-icon">
-                            <Zap size={32} />
-                        </div>
-                        <div>
-                            <h1 className="page-title">Panel Optymalizacji</h1>
-                            <p className="page-subtitle">Zarządzanie regułami optymalizacji i preferencjami urządzeń</p>
-                        </div>
-                    </div>
+                <div className="header-section">
+                    <h1 className="page-title">Optimization Panel</h1>
+                    <p className="page-subtitle">Managing optimization rules and device preferences</p>
                 </div>
 
                 {/* Notification Toast */}
-                <NotificationToast 
+                <NotificationToast
                     notification={notification}
                     onClose={() => setNotification(null)}
                 />
