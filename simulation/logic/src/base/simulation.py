@@ -24,7 +24,7 @@ class Simulation:
     def __init__(self, name: str):
         self.set_name(name)
 
-        self.mqtt = client.Client(f"simulation-{self.name}")
+        self.mqtt = client.Client(f"szebi-{self.name}")
         # self.mqtt.on_message = self.on_mqtt_message
         self.mqtt.connect("mqtt", 1883)
         # self.mqtt.subscribe(f"szebi/{self.name}/#")
@@ -363,4 +363,4 @@ class Simulation:
         self.mqtt.message_callback_add(topic, on_message)
 
     def build_topic(self, topic: str):
-        return f"{self.name}/{topic}"
+        return f"szebi/{topic}"

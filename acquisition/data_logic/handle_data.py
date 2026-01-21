@@ -35,11 +35,16 @@ class HandleData:
                 return None
 
             # Weather: szebi/weather/<uuid>/<metryka>
-            elif topic.startswith("szebi/weather/") or topic.startswith("szebi/device/state/"):
+            if topic.startswith("szebi/weather/") or topic.startswith("szebi/device/state/"):
                 parts = topic.split("/")
                 if len(parts) < 4:
                     return None
-                env_uuid = parts[2]  # uuid pogody lub urządzenia
+                
+                if topic.startswith("szebi/device/state/"):
+                     env_uuid = parts[3]
+                else: 
+                     env_uuid = parts[2]  # uuid pogody
+
                 metric_name = data.get("metric_name") or "is_active"
             else:
                 self._log_error(f"Nieznany topic: {topic}", level=DataLogLevel.WARNING, raw_message=raw_message)
