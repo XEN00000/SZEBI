@@ -60,6 +60,8 @@ urlpatterns = [
     path('api/login/', LoginView.as_view(), name='login'),
     path('api/logout/', LogoutView.as_view(), name='logout'),
 
+    path('api/forecasting/', include('forecasting.urls')),
+
     # optimization API
     path('api/optimization/', include('optimization.api.urls')),
 

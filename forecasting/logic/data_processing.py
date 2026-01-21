@@ -21,7 +21,8 @@ class DataProcessing:
 
     def _get_metric_as_df(self, metric_name, start_date, end_date, column_name):
         """
-        Pomocnicza metoda pobierająca realne pomiary przez AcquisitionDataService.
+        Pomocnicza metoda pobierająca realne pomiary.
+        Kluczowe: Ustawienie DatetimeIndex, aby resample() działało.
         """
         raw_data = self.acq_service.get_filtered_analysis_data(
             metric=metric_name,
@@ -30,10 +31,11 @@ class DataProcessing:
         )
 
         if not raw_data:
-            return pd.DataFrame(columns=[column_name])
+            return pd.DataFrame(columns=[column_name], index=pd.to_datetime([]))
 
-        # Mapowanie obiektów Measurement z bazy na DataFrame
-        df = pd.DataFrame([{'ts': m.timestamp, column_name: m.value} for m in raw_data])
+        data_list = [{'ts': m.timestamp, column_name: m.value} for m in raw_data]
+        df = pd.DataFrame(data_list)
+
         df['ts'] = pd.to_datetime(df['ts'])
         df.set_index('ts', inplace=True)
         return df
@@ -105,7 +107,7 @@ class DataProcessing:
 
         # Budowanie profilu: średnia wartość dla każdego dnia tygodnia i każdej godziny
         weather_profile = hist_data.groupby(['day_of_week', 'hour_of_day'])[
-            ['temp_outdoor', 'cloud_cover', 'wind_speed']].mean().reset_index()
+            ['temp_outdoor', 'cloud_cover', 'wind_speed', 'sunlight']].mean().reset_index()
 
         df_future = pd.DataFrame(index=future_dates)
         df_future['day_of_week'] = df_future.index.dayofweek
@@ -118,6 +120,7 @@ class DataProcessing:
         df_future['temp_outdoor'] += np.random.normal(0, 0.5, size=len(df_future))
         df_future['cloud_cover'] = (df_future['cloud_cover'] + np.random.normal(0, 5, size=len(df_future))).clip(0, 100)
         df_future['wind_speed'] = (df_future['wind_speed'] + np.random.normal(0, 0.2, size=len(df_future))).clip(0, 25)
+        df_future['sunlight'] = (df_future['sunlight'] + np.random.normal(0, 0.05, size=len(df_future))).clip(0, None)
 
         scaler_to_use = external_scaler if external_scaler else self.scaler
         return scaler_to_use.transform(df_future), future_dates
