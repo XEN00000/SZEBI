@@ -10,6 +10,7 @@ import AnalysisDashboard from './pages/AnalysisDashboard.jsx';
 import AcquisitionPage from './pages/AcquisitionPage';
 import Forecasting from "./pages/Forecasting.jsx";
 import OptimalizationPage from './pages/OptimalizationPage';
+import SimulationPage from './pages/SimulationPage';
 
 const ROLES = {
   ADMIN: 'building_admin',
@@ -36,7 +37,7 @@ function App() {
           <Route index element={<Home />} />
 
           <Route element={<ProtectedRoute user={user} allowedRoles={[ROLES.ADMIN, ROLES.PROVIDER]} />}>
-            <Route path="simulation" element={<div className="p-8 text-center text-gray-400">Moduł Symulacji Środowiska</div>} />
+            <Route path="simulation" element={<SimulationPage />} />
           </Route>
 
           <Route element={<ProtectedRoute user={user} allowedRoles={[ROLES.ADMIN, ROLES.MAINTENANCE]} />}>

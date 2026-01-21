@@ -33,7 +33,7 @@ class UserPreference(models.Model):
     Preferencje użytkownika przypisane do konkretnego urządzenia.
     """
     # Relacja do urządzenia z modułu symulacji
-    device = models.OneToOneField('simulation.Device', on_delete=models.CASCADE, related_name='preference')
+    device = models.OneToOneField('simulation.DeviceConfig', on_delete=models.CASCADE, related_name='preference')
     # Oczekiwane parametry (np. temperatura w pokoju, jasność)
     target_value = models.FloatField(null=True, blank=True, help_text="Np. docelowa temperatura lub jasność")
     # Harmonogram pracy (JSON)

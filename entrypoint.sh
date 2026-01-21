@@ -12,8 +12,16 @@ if [ -n "$POSTGRES_HOST" ]; then
   echo "Postgres is ready"
 fi
 
+
+
 echo "Apply database migrations"
 python manage.py migrate --noinput
+
+echo "Using .venv"
+./.venv/Scripts/activate
+
+echo "Installing dependencies"
+pip install -r requirements.txt
 
 if [ "$DJANGO_PRODUCTION" = "1" ]; then
   echo "Starting Gunicorn"

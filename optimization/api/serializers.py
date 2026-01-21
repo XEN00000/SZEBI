@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from simulation.models import Device
+from simulation.api.models import DeviceConfig
 from optimization.models import OptimizationRule, UserPreference, OptimizationLog
 
 class ExternalAlarmSerializer(serializers.Serializer):
@@ -17,7 +17,7 @@ class ExternalAlarmSerializer(serializers.Serializer):
 
 class DeviceSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Device
+        model = DeviceConfig
         fields = ['id', 'name', 'device_type', 'is_active', 'nominal_power']
 
 class OptimizationResultSerializer(serializers.Serializer):
