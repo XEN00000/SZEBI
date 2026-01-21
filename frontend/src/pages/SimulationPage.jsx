@@ -341,319 +341,348 @@ const SimulationPage = () => {
 	};
 
 	return (
-		<div style={{ padding: 16, maxWidth: 1000, margin: '0 auto' }}>
-			<h1 style={{ marginBottom: 8 }}>Simulation</h1>
-			<div style={{ marginBottom: 16, fontSize: 14, opacity: 0.8 }}>
-				Manage simulation, weather, and devices.
-			</div>
-
-			<div style={{ display: 'grid', gap: 12, gridTemplateColumns: '1fr' }}>
-				<section style={{ border: '1px solid #ddd', padding: 12, borderRadius: 6 }}>
-					<h2 style={{ marginTop: 0 }}>Simulation Control</h2>
-					<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-						<button onClick={handleStart} disabled={!simId}>Start</button>
-						<button onClick={handleStop} disabled={!simId}>Stop</button>
-						<button onClick={handleStartDefault}>Start Default</button>
-						<button onClick={refreshAll} disabled={!simId}>Refresh</button>
-					</div>
-					<div style={{ marginTop: 8, fontSize: 13 }}>
-						<strong>ID:</strong> {simId || '...'}
-					</div>
-				</section>
-
-				<section style={{ border: '1px solid #ddd', padding: 12, borderRadius: 6 }}>
-					<h2 style={{ marginTop: 0 }}>Timing</h2>
-					<div style={{ fontSize: 13, marginBottom: 8 }}>
-						<div><strong>Base tick:</strong> {timingInfo?.base_millis_per_tick ?? '—'} ms</div>
-						<div><strong>Simulated tick:</strong> {timingInfo?.simulated_millis_per_tick ?? '—'} ms</div>
-						<div><strong>Speed ratio (base/simulated):</strong> {timingInfo?.speed_ratio ?? '—'}</div>
-					</div>
-					<form onSubmit={handleUpdateTiming} style={{ display: 'grid', gap: 8 }}>
-						<label>
-							Base tick (ms)
-							<input
-								style={{ display: 'block', width: '100%', marginTop: 4 }}
-								value={baseTickMs}
-								onChange={(e) => setBaseTickMs(e.target.value)}
-								placeholder="e.g. 60000"
-							/>
-						</label>
-						<label>
-							Speed ratio (base/simulated)
-							<input
-								style={{ display: 'block', width: '100%', marginTop: 4 }}
-								value={speedRatio}
-								onChange={(e) => setSpeedRatio(e.target.value)}
-								placeholder="e.g. 10"
-							/>
-						</label>
-						<button type="submit" disabled={!simId}>
-							Update Timing
-						</button>
-					</form>
-				</section>
-
-				<section style={{ border: '1px solid #ddd', padding: 12, borderRadius: 6 }}>
-					<h2 style={{ marginTop: 0 }}>Weather</h2>
-					<form onSubmit={handleAddWeather} style={{ display: 'grid', gap: 8 }}>
-						<label>
-							Name
-							<input
-								style={{ display: 'block', width: '100%', marginTop: 4 }}
-								value={weatherName}
-								onChange={(e) => setWeatherName(e.target.value)}
-								placeholder="e.g. outside-1"
-							/>
-						</label>
-						<label>
-							Type
-							<select
-								style={{ display: 'block', width: '100%', marginTop: 4 }}
-								value={weatherType}
-								onChange={(e) => setWeatherType(e.target.value)}
-							>
-								<option value="outside">outside</option>
-								<option value="inside">inside</option>
-							</select>
-						</label>
-						<label>
-							Outside reference
-							<select
-								style={{ display: 'block', width: '100%', marginTop: 4 }}
-								value={weatherOutsideId}
-								onChange={(e) => setWeatherOutsideId(e.target.value)}
-							>
-								<option value="">Select outside weather</option>
-								{weathers
-									.filter(w => (w.type || '').toLowerCase().includes('outside'))
-									.map(w => (
-										<option key={w.uuid} value={w.uuid}>{w.name} ({w.uuid})</option>
-									))}
-							</select>
-						</label>
-						<button type="submit" disabled={!simId}>
-							Add Weather
-						</button>
-					</form>
-
-					<div style={{ marginTop: 12 }}>
-						<strong>Existing Weathers</strong>
-						<ul style={{ paddingLeft: 16 }}>
-							{weathers.map(w => (
-								<li key={w.uuid}>{w.name} — {w.type} — {w.uuid}</li>
-							))}
-						</ul>
-					</div>
-
-					<form onSubmit={handleRemoveWeather} style={{ marginTop: 8 }}>
-						<label>
-							Remove weather
-							<select
-								style={{ display: 'block', width: '100%', marginTop: 4 }}
-								value={removeWeatherId}
-								onChange={(e) => setRemoveWeatherId(e.target.value)}
-							>
-								<option value="">Select weather</option>
-								{weathers.map(w => (
-									<option key={w.uuid} value={w.uuid}>{w.name} ({w.uuid})</option>
-								))}
-							</select>
-						</label>
-						<button type="submit" disabled={!simId || !removeWeatherId} style={{ marginTop: 8 }}>
-							Remove Weather
-						</button>
-					</form>
-				</section>
-
-				<section style={{ border: '1px solid #ddd', padding: 12, borderRadius: 6 }}>
-					<h2 style={{ marginTop: 0 }}>Devices</h2>
-					<form onSubmit={handleAddDevice} style={{ display: 'grid', gap: 8 }}>
-						<label>
-							Name
-							<input
-								style={{ display: 'block', width: '100%', marginTop: 4 }}
-								value={deviceName}
-								onChange={(e) => setDeviceName(e.target.value)}
-								placeholder="e.g. lamp-1"
-							/>
-						</label>
-						<label>
-							Type
-							<select
-								style={{ display: 'block', width: '100%', marginTop: 4 }}
-								value={deviceType}
-								onChange={(e) => setDeviceType(e.target.value)}
-							>
-								<option value="lighting">lighting</option>
-								<option value="airconditioning">airconditioning</option>
-								<option value="photovoltaic">photovoltaic</option>
-								<option value="energystorage">energystorage</option>
-								<option value="electricgrid">electricgrid</option>
-								<option value="heating">heating</option>
-								<option value="windturbine">windturbine</option>
-							</select>
-						</label>
-						{(deviceType === 'lighting' || deviceType === 'airconditioning' || deviceType === 'heating') && (
-							<label>
-								Power (W)
-								<input
-									style={{ display: 'block', width: '100%', marginTop: 4 }}
-									value={extraPower}
-									onChange={(e) => setExtraPower(e.target.value)}
-									placeholder="e.g. 1500"
-								/>
-							</label>
-						)}
-						{deviceType === 'lighting' && (
-							<label>
-								Light output
-								<input
-									style={{ display: 'block', width: '100%', marginTop: 4 }}
-									value={extraLightOutput}
-									onChange={(e) => setExtraLightOutput(e.target.value)}
-									placeholder="e.g. 1"
-								/>
-							</label>
-						)}
-						{deviceType === 'airconditioning' && (
-							<label>
-								Cooling power
-								<input
-									style={{ display: 'block', width: '100%', marginTop: 4 }}
-									value={extraCoolingPower}
-									onChange={(e) => setExtraCoolingPower(e.target.value)}
-									placeholder="e.g. 100"
-								/>
-							</label>
-						)}
-						{deviceType === 'photovoltaic' && (
-							<label>
-								Peak power
-								<input
-									style={{ display: 'block', width: '100%', marginTop: 4 }}
-									value={extraPeakPower}
-									onChange={(e) => setExtraPeakPower(e.target.value)}
-									placeholder="e.g. 8000"
-								/>
-							</label>
-						)}
-						{deviceType === 'energystorage' && (
-							<>
-								<label>
-									Capacity
-									<input
-										style={{ display: 'block', width: '100%', marginTop: 4 }}
-										value={extraCapacity}
-										onChange={(e) => setExtraCapacity(e.target.value)}
-										placeholder="e.g. 150000"
-									/>
-								</label>
-								<label>
-									Max charge
-									<input
-										style={{ display: 'block', width: '100%', marginTop: 4 }}
-										value={extraMaxCharge}
-										onChange={(e) => setExtraMaxCharge(e.target.value)}
-										placeholder="e.g. 8000"
-									/>
-								</label>
-								<label>
-									Max discharge
-									<input
-										style={{ display: 'block', width: '100%', marginTop: 4 }}
-										value={extraMaxDischarge}
-										onChange={(e) => setExtraMaxDischarge(e.target.value)}
-										placeholder="e.g. 5000"
-									/>
-								</label>
-							</>
-						)}
-						{deviceType === 'electricgrid' && (
-							<label>
-								Connection power
-								<input
-									style={{ display: 'block', width: '100%', marginTop: 4 }}
-									value={extraConnectionPower}
-									onChange={(e) => setExtraConnectionPower(e.target.value)}
-									placeholder="e.g. 4000"
-								/>
-							</label>
-						)}
-						{deviceType === 'heating' && (
-							<label>
-								Standby power
-								<input
-									style={{ display: 'block', width: '100%', marginTop: 4 }}
-									value={extraStandbyPower}
-									onChange={(e) => setExtraStandbyPower(e.target.value)}
-									placeholder="e.g. 50"
-								/>
-							</label>
-						)}
-						{deviceType === 'windturbine' && (
-							<label>
-								Rated power
-								<input
-									style={{ display: 'block', width: '100%', marginTop: 4 }}
-									value={extraRatedPower}
-									onChange={(e) => setExtraRatedPower(e.target.value)}
-									placeholder="e.g. 3000"
-								/>
-							</label>
-						)}
-						<label>
-							Weather
-							<select
-								style={{ display: 'block', width: '100%', marginTop: 4 }}
-								value={deviceWeatherId}
-								onChange={(e) => setDeviceWeatherId(e.target.value)}
-							>
-								<option value="">Select weather</option>
-								{weathers.map(w => (
-									<option key={w.uuid} value={w.uuid}>{w.name} ({w.uuid})</option>
-								))}
-							</select>
-						</label>
-						<button type="submit" disabled={!simId}>
-							Add Device
-						</button>
-					</form>
-
-					<div style={{ marginTop: 12 }}>
-						<strong>Existing Devices</strong>
-						<ul style={{ paddingLeft: 16 }}>
-							{devices.map(d => (
-								<li key={d.uuid}>{d.name} — {d.type} — {d.uuid}</li>
-							))}
-						</ul>
-					</div>
-
-					<form onSubmit={handleRemoveDevice} style={{ marginTop: 8 }}>
-						<label>
-							Remove device
-							<select
-								style={{ display: 'block', width: '100%', marginTop: 4 }}
-								value={removeDeviceId}
-								onChange={(e) => setRemoveDeviceId(e.target.value)}
-							>
-								<option value="">Select device</option>
-								{devices.map(d => (
-									<option key={d.uuid} value={d.uuid}>{d.name} ({d.uuid})</option>
-								))}
-							</select>
-						</label>
-						<button type="submit" disabled={!simId || !removeDeviceId} style={{ marginTop: 8 }}>
-							Remove Device
-						</button>
-					</form>
-				</section>
-			</div>
-
-			{statusMsg && (
-				<div style={{ marginTop: 12, padding: 8, border: '1px solid #ccc', borderRadius: 4 }}>
-					{statusMsg}
+		<div className="simulation-container">
+			<div className="simulation-content">
+				
+				<div className="header-section">
+					<h1 className="page-title">Simulation Control</h1>
+					<p className="page-subtitle">Manage simulation, weather, and devices.</p>
 				</div>
-			)}
+
+				<div className="simulation-grid" style={{ display: 'grid', gap: '2rem' }}>
+					
+					{/* Control Section */}
+					<div className="data-card">
+						<div className="card-header">
+							<h2 className="card-title">Status & Control</h2>
+							<span className="badge-count">ID: {simId || 'NONE'}</span>
+						</div>
+						<div style={{ padding: '2rem' }}>
+							<div className="control-buttons" style={{ flexWrap: 'wrap', justifyContent: 'center' }}>
+								<button 
+									className={`btn-control btn-start ${!simId ? 'btn-disabled' : ''}`}
+									onClick={handleStart} 
+									disabled={!simId}
+								>
+									Start
+								</button>
+								<button 
+									className={`btn-control btn-stop ${!simId ? 'btn-disabled' : ''}`}
+									onClick={handleStop} 
+									disabled={!simId}
+								>
+									Stop
+								</button>
+								<button 
+									className="btn-control btn-secondary"
+									onClick={handleStartDefault}
+								>
+									Start Default
+								</button>
+								<button 
+									className={`btn-control btn-secondary ${!simId ? 'btn-disabled' : ''}`}
+									onClick={refreshAll} 
+									disabled={!simId}
+								>
+									Refresh
+								</button>
+							</div>
+							
+							{statusMsg && (
+								<div className="notification-toast notification-success" style={{ position: 'relative', top: 'unset', right: 'unset', marginTop: '1rem' }}>
+									<div className="notification-content">{statusMsg}</div>
+								</div>
+							)}
+						</div>
+					</div>
+
+					{/* Timing Section */}
+					<div className="data-card">
+						<div className="card-header">
+							<h2 className="card-title">Timing Configuration</h2>
+						</div>
+						<div style={{ padding: '2rem' }}>
+							<div className="status-indicator-box" style={{ marginBottom: '2rem', justifyContent: 'space-around', width: '100%' }}>
+								<div className="status-display">
+									<span className="status-label">Base Tick:</span>
+									<span className="font-mono">{timingInfo?.base_millis_per_tick ?? '—'} ms</span>
+								</div>
+								<div className="status-divider"></div>
+								<div className="status-display">
+									<span className="status-label">Sim Tick:</span>
+									<span className="font-mono">{timingInfo?.simulated_millis_per_tick ?? '—'} ms</span>
+								</div>
+								<div className="status-divider"></div>
+								<div className="status-display">
+									<span className="status-label">Ratio:</span>
+									<span className="font-mono">{timingInfo?.speed_ratio ?? '—'}</span>
+								</div>
+							</div>
+
+							<form onSubmit={handleUpdateTiming} className="form-grid" style={{ marginBottom: 0 }}>
+								<div className="form-group">
+									<label className="form-label">Base tick (ms)</label>
+									<input
+										className="form-input"
+										value={baseTickMs}
+										onChange={(e) => setBaseTickMs(e.target.value)}
+										placeholder="e.g. 60000"
+									/>
+								</div>
+								<div className="form-group">
+									<label className="form-label">Speed ratio</label>
+									<input
+										className="form-input"
+										value={speedRatio}
+										onChange={(e) => setSpeedRatio(e.target.value)}
+										placeholder="e.g. 10"
+									/>
+								</div>
+								<div className="form-actions" style={{ gridColumn: '1 / -1', borderTop: 'none', paddingTop: 0 }}>
+									<button type="submit" className="btn-primary" disabled={!simId}>
+										Update Timing
+									</button>
+								</div>
+							</form>
+						</div>
+					</div>
+
+					{/* Weather Section */}
+					<div className="data-card">
+						<div className="card-header">
+							<h2 className="card-title">Weather Conditions</h2>
+							<span className="badge-count">{weathers.length}</span>
+						</div>
+						
+						<div className="rule-form">
+							<form onSubmit={handleAddWeather} className="form-grid">
+								<div className="form-group">
+									<label className="form-label">Name</label>
+									<input
+										className="form-input"
+										value={weatherName}
+										onChange={(e) => setWeatherName(e.target.value)}
+										placeholder="e.g. outside-1"
+									/>
+								</div>
+								<div className="form-group">
+									<label className="form-label">Type</label>
+									<select
+										className="form-select"
+										value={weatherType}
+										onChange={(e) => setWeatherType(e.target.value)}
+									>
+										<option value="outside">outside</option>
+										<option value="inside">inside</option>
+									</select>
+								</div>
+								
+								{weatherType === 'inside' && (
+									<div className="form-group">
+										<label className="form-label">Outside reference</label>
+										<select
+											className="form-select"
+											value={weatherOutsideId}
+											onChange={(e) => setWeatherOutsideId(e.target.value)}
+										>
+											<option value="">Select outside weather</option>
+											{weathers
+												.filter(w => (w.type || '').toLowerCase().includes('outside'))
+												.map(w => (
+													<option key={w.uuid} value={w.uuid}>{w.name} ({w.uuid})</option>
+												))}
+										</select>
+									</div>
+								)}
+
+								<div className="form-actions" style={{ gridColumn: '1 / -1', borderTop: 'none', paddingTop: 0 }}>
+									<button type="submit" className="btn-primary" disabled={!simId}>
+										Add Weather
+									</button>
+								</div>
+							</form>
+						</div>
+
+						<div className="table-responsive">
+							<table className="sensor-table">
+								<thead>
+									<tr>
+										<th>Name</th>
+										<th>Type</th>
+										<th>UUID</th>
+										<th className="text-right">Action</th>
+									</tr>
+								</thead>
+								<tbody>
+									{weathers.length === 0 ? (
+										<tr><td colSpan="4" className="empty-state">No weather conditions defined.</td></tr>
+									) : (
+										weathers.map(w => (
+											<tr key={w.uuid}>
+												<td className="font-medium">{w.name}</td>
+												<td><span className="badge-count" style={{ fontSize: '0.7em' }}>{w.type}</span></td>
+												<td className="font-mono" style={{ fontSize: '0.8em' }}>{w.uuid}</td>
+												<td className="text-right">
+													<button 
+														className="btn-ghost-danger"
+														onClick={() => { setRemoveWeatherId(w.uuid); handleRemoveWeather({ preventDefault: () => {} }); }} // Hacky reuse of handler, ideally split it
+													>
+														Remove
+													</button>
+												</td>
+											</tr>
+										))
+									)}
+								</tbody>
+							</table>
+						</div>
+					</div>
+
+					{/* Devices Section */}
+					<div className="data-card">
+						<div className="card-header">
+							<h2 className="card-title">Simulated Devices</h2>
+							<span className="badge-count">{devices.length}</span>
+						</div>
+
+						<div className="rule-form">
+							<form onSubmit={handleAddDevice} className="form-grid">
+								<div className="form-group">
+									<label className="form-label">Name</label>
+									<input
+										className="form-input"
+										value={deviceName}
+										onChange={(e) => setDeviceName(e.target.value)}
+										placeholder="e.g. lamp-1"
+									/>
+								</div>
+								<div className="form-group">
+									<label className="form-label">Type</label>
+									<select
+										className="form-select"
+										value={deviceType}
+										onChange={(e) => setDeviceType(e.target.value)}
+									>
+										<option value="lighting">lighting</option>
+										<option value="airconditioning">airconditioning</option>
+										<option value="photovoltaic">photovoltaic</option>
+										<option value="energystorage">energystorage</option>
+										<option value="electricgrid">electricgrid</option>
+										<option value="heating">heating</option>
+										<option value="windturbine">windturbine</option>
+									</select>
+								</div>
+								
+								{/* Dynamic Fields based on Type */}
+								{(deviceType === 'lighting' || deviceType === 'airconditioning' || deviceType === 'heating') && (
+									<div className="form-group">
+										<label className="form-label">Power (W)</label>
+										<input className="form-input" value={extraPower} onChange={(e) => setExtraPower(e.target.value)} placeholder="e.g. 1500" />
+									</div>
+								)}
+								{deviceType === 'lighting' && (
+									<div className="form-group">
+										<label className="form-label">Light output</label>
+										<input className="form-input" value={extraLightOutput} onChange={(e) => setExtraLightOutput(e.target.value)} placeholder="e.g. 1" />
+									</div>
+								)}
+								{deviceType === 'airconditioning' && (
+									<div className="form-group">
+										<label className="form-label">Cooling power</label>
+										<input className="form-input" value={extraCoolingPower} onChange={(e) => setExtraCoolingPower(e.target.value)} placeholder="e.g. 100" />
+									</div>
+								)}
+								{deviceType === 'photovoltaic' && (
+									<div className="form-group">
+										<label className="form-label">Peak power</label>
+										<input className="form-input" value={extraPeakPower} onChange={(e) => setExtraPeakPower(e.target.value)} placeholder="e.g. 8000" />
+									</div>
+								)}
+								{deviceType === 'energystorage' && (
+									<>
+										<div className="form-group"><label className="form-label">Capacity</label><input className="form-input" value={extraCapacity} onChange={(e) => setExtraCapacity(e.target.value)} placeholder="e.g. 150000" /></div>
+										<div className="form-group"><label className="form-label">Max charge</label><input className="form-input" value={extraMaxCharge} onChange={(e) => setExtraMaxCharge(e.target.value)} placeholder="e.g. 8000" /></div>
+										<div className="form-group"><label className="form-label">Max discharge</label><input className="form-input" value={extraMaxDischarge} onChange={(e) => setExtraMaxDischarge(e.target.value)} placeholder="e.g. 5000" /></div>
+									</>
+								)}
+								{deviceType === 'electricgrid' && (
+									<div className="form-group">
+										<label className="form-label">Connection power</label>
+										<input className="form-input" value={extraConnectionPower} onChange={(e) => setExtraConnectionPower(e.target.value)} placeholder="e.g. 4000" />
+									</div>
+								)}
+								{deviceType === 'heating' && (
+									<div className="form-group">
+										<label className="form-label">Standby power</label>
+										<input className="form-input" value={extraStandbyPower} onChange={(e) => setExtraStandbyPower(e.target.value)} placeholder="e.g. 50" />
+									</div>
+								)}
+								{deviceType === 'windturbine' && (
+									<div className="form-group">
+										<label className="form-label">Rated power</label>
+										<input className="form-input" value={extraRatedPower} onChange={(e) => setExtraRatedPower(e.target.value)} placeholder="e.g. 3000" />
+									</div>
+								)}
+
+								<div className="form-group">
+									<label className="form-label">Weather</label>
+									<select
+										className="form-select"
+										value={deviceWeatherId}
+										onChange={(e) => setDeviceWeatherId(e.target.value)}
+									>
+										<option value="">Select weather</option>
+										{weathers.map(w => (
+											<option key={w.uuid} value={w.uuid}>{w.name} ({w.uuid})</option>
+										))}
+									</select>
+								</div>
+
+								<div className="form-actions" style={{ gridColumn: '1 / -1', borderTop: 'none', paddingTop: 0 }}>
+									<button type="submit" className="btn-primary" disabled={!simId}>
+										Add Device
+									</button>
+								</div>
+							</form>
+						</div>
+
+						<div className="table-responsive">
+							<table className="sensor-table">
+								<thead>
+									<tr>
+										<th>Name</th>
+										<th>Type</th>
+										<th>UUID</th>
+										<th className="text-right">Action</th>
+									</tr>
+								</thead>
+								<tbody>
+									{devices.length === 0 ? (
+										<tr><td colSpan="4" className="empty-state">No devices added.</td></tr>
+									) : (
+										devices.map(d => (
+											<tr key={d.uuid}>
+												<td className="font-medium">{d.name}</td>
+												<td><span className="badge-count" style={{ fontSize: '0.7em' }}>{d.type}</span></td>
+												<td className="font-mono" style={{ fontSize: '0.8em' }}>{d.uuid}</td>
+												<td className="text-right">
+													<button 
+														className="btn-ghost-danger"
+														onClick={() => { setRemoveDeviceId(d.uuid); handleRemoveDevice({ preventDefault: () => {} }); }}
+													>
+														Remove
+													</button>
+												</td>
+											</tr>
+										))
+									)}
+								</tbody>
+							</table>
+						</div>
+					</div>
+
+				</div>
+			</div>
 		</div>
 	);
 };

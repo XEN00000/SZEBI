@@ -11,8 +11,6 @@ urlpatterns = [
     path('status', views.get_simulation_status, name="status"),
     path('timing', views.get_simulation_timing, name="timing"),
     path('timing/update', views.update_simulation_timing, name="timing_update"),
-    path('summary', views.get_simulation_summary, name="summary"),
-    path('history', views.get_simulation_history, name="history"),
 
     path('device/list', views.list_devices, name="device_list"),
     path('device/status/<uuid:device_uuid>', views.device_status, name="device_status"),

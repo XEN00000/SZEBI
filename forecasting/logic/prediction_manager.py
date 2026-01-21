@@ -46,27 +46,41 @@ class PredictionManager:
             self.repository.deployModel(best)
 
     def generateAndPublishForecast(self):
-        input_data = self.dataProcessor.getPredictionInput()
+        # Unpack tuple from dataProcessor
+        X_input, future_dates = self.dataProcessor.getPredictionInput()
 
         # 1. Prognoza Zużycia
         model_cons = self.repository.getActiveModel('consumption')
-        if not model_cons:
-            print("Brak modelu consumption!")
-            return self.forecastReporter
-        pred_cons = model_cons.predict(input_data)
-
         # 2. Prognoza Produkcji
         model_prod = self.repository.getActiveModel('production')
-        if not model_prod:
-            print("Brak modelu production!")
+
+        if not model_cons or not model_prod:
+            print("Brak aktywnych modeli. Uruchamiam auto-trening...")
+            self.initiateTrainingCycle()
+            model_cons = self.repository.getActiveModel('consumption')
+            model_prod = self.repository.getActiveModel('production')
+
+        if not model_cons:
+            print("Nadal brak modelu consumption mimo treningu!")
             return self.forecastReporter
-        pred_prod = model_prod.predict(input_data)
+        
+        pred_cons = model_cons.predict(X_input)
+
+        if not model_prod:
+            print("Nadal brak modelu production mimo treningu!")
+            return self.forecastReporter
+        
+        pred_prod = model_prod.predict(X_input)
 
         # 3. Łączenie wyników (kolumna obok kolumny)
         combined_result = np.column_stack((pred_cons, pred_prod))
 
         # Zapis
-        self.forecastReporter.generateReport(combined_result, f"{model_cons.modelID}|{model_prod.modelID}")
+        self.forecastReporter.generateReport(
+            predicted_values=combined_result, 
+            model_id=f"{model_cons.modelID}|{model_prod.modelID}",
+            timestamps=future_dates
+        )
         self.forecastReporter.saveToDatabase()
 
         return self.forecastReporter

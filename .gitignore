@@ -213,3 +213,5 @@ mosquitto/log/*
 
 # macos
 .DS_Store
+
+/trained_models/*

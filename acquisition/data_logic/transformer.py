@@ -31,6 +31,10 @@ class Transformer:
             "W": lambda x: x,  # W → W
             "kW": lambda x: x * 1000,  # kW → W
             "kWh": lambda x: x,  # kWh → kWh
+            "Wh": lambda x: x / 1000.0, # Wh → kWh
+
+            # --- Inne ---
+            "standard": lambda x: x,
 
             # --- Procenty / ułamki ---
             "%": lambda x: x / 100.0,  # % → 0.0–1.0

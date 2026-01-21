@@ -1216,7 +1216,8 @@ a {
 
 /* AcquisitionPage */
 
-.acquisition-container {
+.acquisition-container,
+.simulation-container {
   min-height: 100vh;
   background-color: #0f172a;
   background-image: radial-gradient(at top center, #1e293b 0%, #0f172a 60%);
@@ -1225,7 +1226,8 @@ a {
   font-family: var(--font-sans);
 }
 
-.acquisition-content {
+.acquisition-content,
+.simulation-content {
   max-width: 64rem;
   margin: 0 auto;
   display: flex;
