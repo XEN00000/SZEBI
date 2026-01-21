@@ -12,8 +12,6 @@ if [ -n "$POSTGRES_HOST" ]; then
   echo "Postgres is ready"
 fi
 
-
-
 echo "Apply database migrations"
 python manage.py migrate --noinput
 

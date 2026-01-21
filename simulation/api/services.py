@@ -47,7 +47,7 @@ def load_simulation(sim_cfg: SimulationConfig) -> Simulation:
             continue
         if dcfg.type == "lighting":
             print("lighting")
-            dev = Lighting(dcfg.name, weather, dcfg.extra.get("power", 15), dcfg.extra.get("light_output", 1))
+            dev = Lighting(dcfg.name, weather, dcfg.extra.get("power", 15), dcfg.extra.get("standby_power", 1))
             sim.devices.append(dev)
         elif dcfg.type == "airconditioning":
             print("airconditioning")
