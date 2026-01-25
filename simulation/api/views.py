@@ -62,7 +62,7 @@ def index(request):
 @require_http_methods(['POST'])
 def create_simulation(request):
     payload = json.loads(request.body or "{}")
-    name = payload.get("name", "simulation-1")
+    name = payload.get("name", "szebi")
     sim_cfg, _ = SimulationConfig.objects.get_or_create(name=name)
     return JsonResponse({"status": "simulation created", "id": str(sim_cfg.id), "name": sim_cfg.name})
 
@@ -87,7 +87,7 @@ def stop_simulation(request):
 
 @require_http_methods(['GET'])
 def start_default_simulation(request):
-    sim_cfg, _ = SimulationConfig.objects.get_or_create(name="simulation-1")
+    sim_cfg, _ = SimulationConfig.objects.get_or_create(name="szebi")
     # seed weathers/devices if empty
     if sim_cfg.weathers.count() == 0 and sim_cfg.devices.count() == 0:
         out_w = WeatherConfig.objects.create(simulation=sim_cfg, name="out1", type="outside")
